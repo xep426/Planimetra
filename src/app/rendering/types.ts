@@ -24,6 +24,8 @@ export interface DrawContext {
   columnJoinMode: boolean;
   /** Whether the wall loop is closed (all nodes have 2 connections). */
   loopClosed: boolean;
+  /** True while dragging from one open endpoint to the other (close-loop preview). */
+  closeLoopPreview: boolean;
   /** Mutable array — drawWalls populates it, subsequent drawers append to it. */
   labelBounds: LabelBounds[];
   pendingNode: { id: string; x: number; y: number } | null;

@@ -6,7 +6,7 @@ import { findLabelPlacement } from './labelCollision';
 let _lastWallExteriorPerp = new Map<string, {perpX: number, perpY: number}>();
 
 export function drawWalls(ctx: CanvasRenderingContext2D, dc: DrawContext) {
-  const { nodes, walls, windows, doors, passages, columns, transform, selectedWallId, selectedTool } = dc;
+  const { nodes, walls, windows, doors, passages, columns, transform, selectedWallId, selectedTool, closeLoopPreview } = dc;
   const newLabelBounds: LabelBounds[] = [];
 
   // --- Compute CW loop exterior perpendiculars for outer wall preview ---
@@ -127,9 +127,10 @@ export function drawWalls(ctx: CanvasRenderingContext2D, dc: DrawContext) {
 
     // Orange in wall mode (editing wall itself), green in other modes (target for adding objects)
     const selColor = selectedTool === 'wall' ? '#f97316' : '#22c55e';
+    const baseColor = closeLoopPreview ? '#22c55e' : '#ffffff';
 
     // Draw wall as a simple line (inner face)
-    ctx.strokeStyle = sel ? selColor : '#ffffff';
+    ctx.strokeStyle = closeLoopPreview ? baseColor : (sel ? selColor : baseColor);
     ctx.lineWidth = sel ? 3 / transform.scale : (wall.type === 'external' ? 3.5 / transform.scale : 1.2 / transform.scale);
     ctx.beginPath();
     ctx.moveTo(nA.x, nA.y);

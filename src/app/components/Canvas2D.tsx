@@ -366,12 +366,22 @@ export function Canvas2D() {
 
   const renderScene = (ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) => {
     const labelBoundsArr: LabelBounds[] = [];
+    const closeLoopPreview = Boolean(
+      previewLine &&
+      openLoopEndpoints &&
+      previewLine.snapNodeId &&
+      (
+        (previewLine.fromNodeId === openLoopEndpoints.nodeA && previewLine.snapNodeId === openLoopEndpoints.nodeB) ||
+        (previewLine.fromNodeId === openLoopEndpoints.nodeB && previewLine.snapNodeId === openLoopEndpoints.nodeA)
+      )
+    );
     const dc: DrawContext = {
       nodes, walls, windows, doors, passages, columns,
       transform, selectedTool,
       selectedWallId, selectedWindowId, selectedDoorId, selectedPassageId, selectedColumnId,
       nodeConstraints, wallInteriorSign, columnsToJoin, columnJoinMode,
       loopClosed: isLoopClosed(),
+      closeLoopPreview,
       labelBounds: labelBoundsArr,
       pendingNode: pendingNodeRef.current,
       roomName: activeRoomName,
@@ -407,7 +417,7 @@ export function Canvas2D() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     renderScene(ctx, canvas);
-  }, [transform, nodes, walls, previewLine, selectedWallId, nodeConstraints, windows, selectedWindowId, doors, selectedDoorId, passages, selectedPassageId, columns, selectedColumnId, selectedTool, columnsToJoin, columnJoinMode, activeRoomName]);
+  }, [transform, nodes, walls, previewLine, openLoopEndpoints, selectedWallId, nodeConstraints, windows, selectedWindowId, doors, selectedDoorId, passages, selectedPassageId, columns, selectedColumnId, selectedTool, columnsToJoin, columnJoinMode, activeRoomName]);
 
   // ---- DXF Export ------------------------------------------------------------
 

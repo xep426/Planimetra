@@ -90,6 +90,10 @@ export interface UseGesturesParams {
 const DRAG_THRESHOLD = 8; // px – distinguishes tap from drag (mouse)
 const DRAG_THRESHOLD_TOUCH = 18; // px – larger for finger imprecision on touch screens
 const NODE_HIT_RADIUS = 18; // px
+const NODE_HIT_RADIUS_TOUCH = NODE_HIT_RADIUS + 10; // px – more forgiving for finger imprecision
+const CLOSE_LOOP_RADIUS_TOUCH = NODE_HIT_RADIUS + 16; // px – extra forgiveness to hit the opposite endpoint
+const CLOSE_LOOP_SNAP_PX_TOUCH = 48; // px – prefer endpoint when finger is close in screen space
+const CLOSE_LOOP_SNAP_PX_MOUSE = 24; // px
 
 // Module-level mutable store for the last preview direction during wall drag.
 // Safe because only one Canvas2D instance exists at a time.
@@ -121,6 +125,7 @@ export function useGestures(p: UseGesturesParams) {
   const dragStartScreenRef = useRef<{ x: number; y: number } | null>(null);
   const isDraggingWallRef = useRef(false);
   const tapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastPreviewLineRef = useRef<PreviewLine | null>(null);
   // Middle-mouse rotation state
   const rotateRef = useRef<{ startScreenX: number; pivotWX: number; pivotWY: number; startRotation: number; startX: number; startY: number } | null>(null);
 
@@ -302,33 +307,84 @@ export function useGestures(p: UseGesturesParams) {
   // Wall drag handling
   // ---------------------------------------------------------------------------
 
+  const getOpenEndpoints = () => {
+    const ends = p.nodes.filter(n => p.nodeConnections(n.id) === 1).map(n => n.id);
+    return ends.length === 2 ? { nodeA: ends[0], nodeB: ends[1] } : null;
+  };
+
+  const openEndpoints = p.openLoopEndpoints ?? getOpenEndpoints();
+
   const startWallDrag = (nodeId: string) => {
     dragSourceRef.current = nodeId;
     isDraggingWallRef.current = true;
   };
 
-  const updateWallDrag = (sx: number, sy: number) => {
+  const findNearbyNodeWithRadius = (wx: number, wy: number, excludeId: string, radiusPx: number) => {
+    const r = radiusPx / p.transform.scale;
+    return (
+      p.nodes.find(
+        n => n.id !== excludeId &&
+          p.nodeConnections(n.id) < 2 &&
+          Math.hypot(n.x - wx, n.y - wy) < r
+      ) ?? undefined
+    );
+  };
+
+  const updateWallDrag = (sx: number, sy: number, isTouch = false) => {
     if (!dragSourceRef.current) return;
     const sourceNode = p.nodes.find(n => n.id === dragSourceRef.current);
     if (!sourceNode) return;
 
     const { x: wx, y: wy } = p.screenToWorld(sx, sy);
-    const { x: snx, y: sny } = p.snapped(wx, wy);
+    const worldToScreen = (wx2: number, wy2: number) => {
+      const canvas = p.canvasRef.current;
+      if (!canvas) return null;
+      const cos = Math.cos(p.transform.rotation);
+      const sin = Math.sin(p.transform.rotation);
+      const x1 = (wx2 + p.transform.x) * p.transform.scale;
+      const y1 = (wy2 + p.transform.y) * p.transform.scale;
+      const xr = x1 * cos - y1 * sin;
+      const yr = x1 * sin + y1 * cos;
+      return { x: xr + canvas.width / 2, y: yr + canvas.height / 2 };
+    };
+    // Check for snap to existing node using raw world coords (avoid grid-snapping away from nodes)
+    let nearNode = p.findNearbyNode(wx, wy, dragSourceRef.current);
+    if (!nearNode && isTouch) {
+      nearNode = findNearbyNodeWithRadius(wx, wy, dragSourceRef.current, NODE_HIT_RADIUS_TOUCH);
+    }
 
-    // Check for snap to existing node
-    const nearNode = p.findNearbyNode(snx, sny, dragSourceRef.current);
+    // Special-case: if we are dragging from an open-loop endpoint, prefer snapping to the opposite endpoint
+    if (!nearNode && openEndpoints && dragSourceRef.current) {
+      const { nodeA: epA, nodeB: epB } = openEndpoints;
+      const targetId = dragSourceRef.current === epA ? epB : (dragSourceRef.current === epB ? epA : null);
+      if (targetId) {
+        const targetNode = p.nodes.find(n => n.id === targetId);
+        if (targetNode) {
+          const r = (isTouch ? CLOSE_LOOP_RADIUS_TOUCH : NODE_HIT_RADIUS) / p.transform.scale;
+          const screenPos = worldToScreen(targetNode.x, targetNode.y);
+          const snapPx = isTouch ? CLOSE_LOOP_SNAP_PX_TOUCH : CLOSE_LOOP_SNAP_PX_MOUSE;
+          const closeInScreen = screenPos ? Math.hypot(screenPos.x - sx, screenPos.y - sy) < snapPx : false;
+          if (closeInScreen || Math.hypot(targetNode.x - wx, targetNode.y - wy) < r) {
+            nearNode = targetNode;
+          }
+        }
+      }
+    }
+    const { x: snx, y: sny } = p.snapped(wx, wy);
 
     // Is the source node unconstrained (free angle)?
     const isFreeAngle = p.nodeConstraints.has(dragSourceRef.current);
 
     if (nearNode) {
       _lastPreviewDir = null; // snapping to node, no direction needed
-      p.setPreviewLine({
+      const preview: PreviewLine = {
         fromNodeId: dragSourceRef.current,
         toX: nearNode.x,
         toY: nearNode.y,
         snapNodeId: nearNode.id,
-      });
+      };
+      lastPreviewLineRef.current = preview;
+      p.setPreviewLine(preview);
     } else if (isFreeAngle) {
       // Unconstrained: no angle snapping at all, use raw snapped position
       const dx = snx - sourceNode.x;
@@ -337,11 +393,13 @@ export function useGestures(p: UseGesturesParams) {
       if (dist > 0) {
         _lastPreviewDir = { directionX: dx / dist, directionY: dy / dist };
       }
-      p.setPreviewLine({
+      const preview: PreviewLine = {
         fromNodeId: dragSourceRef.current,
         toX: snx,
         toY: sny,
-      });
+      };
+      lastPreviewLineRef.current = preview;
+      p.setPreviewLine(preview);
     } else {
       // Snap direction from source node
       const dir = p.snapDirection(sourceNode.x, sourceNode.y, snx, sny, dragSourceRef.current);
@@ -352,20 +410,24 @@ export function useGestures(p: UseGesturesParams) {
         const projLen = dx * dir.directionX + dy * dir.directionY;
         const projX = sourceNode.x + dir.directionX * projLen;
         const projY = sourceNode.y + dir.directionY * projLen;
-        p.setPreviewLine({
+        const preview: PreviewLine = {
           fromNodeId: dragSourceRef.current,
           toX: projX,
           toY: projY,
           directionX: dir.directionX,
           directionY: dir.directionY,
-        });
+        };
+        lastPreviewLineRef.current = preview;
+        p.setPreviewLine(preview);
       } else {
         _lastPreviewDir = null;
-        p.setPreviewLine({
+        const preview: PreviewLine = {
           fromNodeId: dragSourceRef.current,
           toX: snx,
           toY: sny,
-        });
+        };
+        lastPreviewLineRef.current = preview;
+        p.setPreviewLine(preview);
       }
     }
   };
@@ -377,16 +439,56 @@ export function useGestures(p: UseGesturesParams) {
     dragSourceRef.current = null;
     isDraggingWallRef.current = false;
     p.setPreviewLine(null);
+    const lastPreview = lastPreviewLineRef.current;
+    lastPreviewLineRef.current = null;
 
     if (!sourceNode) return;
 
     const { x: wx, y: wy } = p.screenToWorld(sx, sy);
+    const worldToScreen = (wx2: number, wy2: number) => {
+      const canvas = p.canvasRef.current;
+      if (!canvas) return null;
+      const cos = Math.cos(p.transform.rotation);
+      const sin = Math.sin(p.transform.rotation);
+      const x1 = (wx2 + p.transform.x) * p.transform.scale;
+      const y1 = (wy2 + p.transform.y) * p.transform.scale;
+      const xr = x1 * cos - y1 * sin;
+      const yr = x1 * sin + y1 * cos;
+      return { x: xr + canvas.width / 2, y: yr + canvas.height / 2 };
+    };
+    // Use raw world coords for near-node detection to avoid grid snap jitter on touch
+    let nearNode = p.findNearbyNode(wx, wy, sourceId);
+    if (!nearNode && isTouch) {
+      nearNode = findNearbyNodeWithRadius(wx, wy, sourceId, NODE_HIT_RADIUS_TOUCH);
+    }
+
+    // Prefer close-loop endpoint even if near-node detection fails
+    if (!nearNode && openEndpoints) {
+      const { nodeA: epA, nodeB: epB } = openEndpoints;
+      const targetId = sourceId === epA ? epB : (sourceId === epB ? epA : null);
+      if (targetId) {
+        const targetNode = p.nodes.find(n => n.id === targetId);
+        if (targetNode) {
+          const r = (isTouch ? CLOSE_LOOP_RADIUS_TOUCH : NODE_HIT_RADIUS) / p.transform.scale;
+          const screenPos = worldToScreen(targetNode.x, targetNode.y);
+          const snapPx = isTouch ? CLOSE_LOOP_SNAP_PX_TOUCH : CLOSE_LOOP_SNAP_PX_MOUSE;
+          const closeInScreen = screenPos ? Math.hypot(screenPos.x - sx, screenPos.y - sy) < snapPx : false;
+          const closeInWorld = Math.hypot(targetNode.x - wx, targetNode.y - wy) < r;
+          const previewSnappedToTarget = lastPreview?.snapNodeId === targetId;
+          const previewNearTarget = lastPreview
+            ? Math.hypot(targetNode.x - lastPreview.toX, targetNode.y - lastPreview.toY) < r
+            : false;
+          if (closeInScreen || closeInWorld || previewSnappedToTarget || previewNearTarget) {
+            nearNode = targetNode;
+          }
+        }
+      }
+    }
     const { x: snx, y: sny } = p.snapped(wx, wy);
-    const nearNode = p.findNearbyNode(snx, sny, sourceId);
 
     // Check for close-loop: dragging between open-loop endpoints
-    if (nearNode && p.openLoopEndpoints) {
-      const { nodeA: epA, nodeB: epB } = p.openLoopEndpoints;
+    if (nearNode && openEndpoints) {
+      const { nodeA: epA, nodeB: epB } = openEndpoints;
       if ((sourceId === epA && nearNode.id === epB) || (sourceId === epB && nearNode.id === epA)) {
         p.onCloseLoop(sourceId, nearNode.id);
         return;
@@ -698,9 +800,9 @@ export function useGestures(p: UseGesturesParams) {
           isDraggingWallRef.current = true;
         }
         if (isDraggingWallRef.current) {
-          updateWallDrag(t.x, t.y);
-          return;
-        }
+        updateWallDrag(t.x, t.y, true);
+        return;
+      }
         return; // Still within threshold, wait
       }
 
