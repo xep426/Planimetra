@@ -294,27 +294,29 @@ export function AppMenu({
                   </svg>
                   Load Project
                 </button>
-                <div className="pt-2 border-t border-gray-700">
-                  <button onClick={() => { onClearAll(); onCloseMenu(); }}
-                    className="w-full px-4 py-3 rounded-lg flex items-center gap-3 bg-gray-800 text-gray-200 hover:bg-gray-700 hover:text-white">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                      <polyline points="14 2 14 8 20 8" />
-                      <line x1="12" y1="18" x2="12" y2="12" />
-                      <line x1="9" y1="15" x2="15" y2="15" />
-                    </svg>
-                    New Project
-                  </button>
-                </div>
+                <button onClick={() => { onClearAll(); onCloseMenu(); }}
+                  className="w-full px-4 py-3 rounded-lg flex items-center gap-3 bg-gray-800 text-gray-200 hover:bg-gray-700 hover:text-white">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                    <line x1="12" y1="18" x2="12" y2="12" />
+                    <line x1="9" y1="15" x2="15" y2="15" />
+                  </svg>
+                  New Project
+                </button>
               </div>
             </div>
 
-            {/* Footer watermark */}
-            <div className="px-4 py-2 border-t border-gray-700/50 text-center">
-              <div className="text-[10px] text-gray-400">PLANIMETRA</div>
-              <div className="text-[10px] text-gray-500 mt-0.5">
-                © {new Date().getFullYear()} · <a href="mailto:mail@planimetra.com" className="text-cyan-600 hover:text-cyan-400 transition-colors">mail@planimetra.com</a>
-              </div>
+            <div className="px-4 py-2 border-t border-gray-700/60">
+              <a
+                href="https://github.com/xep426/Planimetra"
+                className="flex items-center justify-center gap-2 text-[11px] text-gray-300 hover:text-white transition-colors"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M12 .5a12 12 0 0 0-3.79 23.4c.6.11.82-.26.82-.58v-2.1c-3.34.73-4.04-1.6-4.04-1.6-.55-1.4-1.34-1.78-1.34-1.78-1.1-.75.08-.74.08-.74 1.21.08 1.85 1.24 1.85 1.24 1.08 1.84 2.84 1.31 3.53 1 .11-.78.42-1.31.76-1.61-2.67-.31-5.47-1.34-5.47-5.95 0-1.31.47-2.38 1.24-3.22-.12-.31-.54-1.57.12-3.27 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.29-1.55 3.3-1.23 3.3-1.23.66 1.7.24 2.96.12 3.27.77.84 1.24 1.91 1.24 3.22 0 4.62-2.8 5.64-5.48 5.95.43.37.81 1.1.81 2.22v3.29c0 .32.22.69.83.58A12 12 0 0 0 12 .5Z" />
+                </svg>
+                Visit the project on GitHub
+              </a>
             </div>
           </div>
         </>
