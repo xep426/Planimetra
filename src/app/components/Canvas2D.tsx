@@ -47,6 +47,7 @@ export function Canvas2D() {
   const drawSceneRef = useRef<((ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) => void) | null>(null);
   const labelBoundsRef = useRef<LabelBounds[]>([]);
   const [showNewProjectDialog, setShowNewProjectDialog] = useState(false);
+  const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 });
 
   // ---- Centralised state (Phase 6) ------------------------------------------
 
@@ -100,6 +101,7 @@ export function Canvas2D() {
     const resize = () => {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
+      setCanvasSize({ width: canvas.width, height: canvas.height });
       const ctx = canvas.getContext('2d');
       if (ctx) requestAnimationFrame(() => drawSceneRef.current?.(ctx, canvas));
     };
@@ -198,6 +200,18 @@ export function Canvas2D() {
   const snapDirection = (fx: number, fy: number, tx: number, ty: number, refId?: string) =>
     snapDirectionUtil(fx, fy, tx, ty, refId, walls, nodes);
 
+  const worldToScreen = (wx: number, wy: number) => {
+    const { width, height } = canvasSize;
+    if (width === 0 || height === 0) return null;
+    const cos = Math.cos(transform.rotation);
+    const sin = Math.sin(transform.rotation);
+    const x1 = (wx + transform.x) * transform.scale;
+    const y1 = (wy + transform.y) * transform.scale;
+    const xr = x1 * cos - y1 * sin;
+    const yr = x1 * sin + y1 * cos;
+    return { x: xr + width / 2, y: yr + height / 2 };
+  };
+
   // ---- history (dispatch-based) ---------------------------------------------
 
   const saveHistory = (newNodes: Node[], newWalls: Wall[], newWindows?: WindowObj[], newDoors?: DoorObj[], newPassages?: PassageObj[], newColumns?: ColumnObj[]) => {
@@ -216,6 +230,42 @@ export function Canvas2D() {
     setShowNewProjectDialog(false);
     handleClearAll();
   };
+
+  const recenterGeometry = () => {
+    if (nodes.length === 0) return;
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    nodes.forEach(n => {
+      minX = Math.min(minX, n.x);
+      minY = Math.min(minY, n.y);
+      maxX = Math.max(maxX, n.x);
+      maxY = Math.max(maxY, n.y);
+    });
+    if (!Number.isFinite(minX) || !Number.isFinite(minY)) return;
+    const cx = (minX + maxX) / 2;
+    const cy = (minY + maxY) / 2;
+    setTransform(prev => ({ ...prev, x: -cx, y: -cy }));
+  };
+
+  const contentOffscreen = useMemo(() => {
+    if (nodes.length === 0) return false;
+    if (canvasSize.width === 0 || canvasSize.height === 0) return false;
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    for (const n of nodes) {
+      const s = worldToScreen(n.x, n.y);
+      if (!s) continue;
+      minX = Math.min(minX, s.x);
+      minY = Math.min(minY, s.y);
+      maxX = Math.max(maxX, s.x);
+      maxY = Math.max(maxY, s.y);
+    }
+    if (!Number.isFinite(minX) || !Number.isFinite(minY)) return false;
+    const intersects =
+      maxX >= 0 &&
+      minX <= canvasSize.width &&
+      maxY >= 0 &&
+      minY <= canvasSize.height;
+    return !intersects;
+  }, [nodes, transform, canvasSize]);
 
   // ---- undo/redo action labels (computed by diffing history entries) ----------
 
@@ -575,7 +625,39 @@ export function Canvas2D() {
         onStartColumnJoin={handleStartColumnJoin}
         onJoinColumns={handleJoinColumns}
         onCancelColumnJoin={handleCancelColumnJoin}
+        hideMobile={contentOffscreen}
+        renderOverride={
+          <button
+            onClick={recenterGeometry}
+            className="rounded-full bg-green-500 text-white px-4 py-3 shadow-lg flex items-center gap-2 hover:bg-green-600"
+            title="Center Drawing"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="8" />
+              <line x1="12" y1="2" x2="12" y2="6" />
+              <line x1="12" y1="18" x2="12" y2="22" />
+              <line x1="2" y1="12" x2="6" y2="12" />
+              <line x1="18" y1="12" x2="22" y2="12" />
+            </svg>
+            <span className="text-sm font-semibold">Center Drawing</span>
+          </button>
+        }
       />
+
+      <button
+        onClick={recenterGeometry}
+        className={`hidden md:flex fixed bottom-4 left-1/2 -translate-x-1/2 z-40 rounded-full bg-green-500 text-white px-4 py-3 shadow-lg items-center gap-2 hover:bg-green-600 transition-opacity duration-200 ${contentOffscreen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+        title="Center Drawing"
+      >
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="8" />
+          <line x1="12" y1="2" x2="12" y2="6" />
+          <line x1="12" y1="18" x2="12" y2="22" />
+          <line x1="2" y1="12" x2="6" y2="12" />
+          <line x1="18" y1="12" x2="22" y2="12" />
+        </svg>
+        <span className="text-sm font-semibold">Center Drawing</span>
+      </button>
 
       <LayersDropdown
         selectedTool={selectedTool}
@@ -668,6 +750,7 @@ export function Canvas2D() {
         canDeleteWall={canDeleteSelectedWall}
         deleteWallDisabledReason={deleteWallDisabledReason}
       />
+
 
       <AlertDialog open={showNewProjectDialog} onOpenChange={setShowNewProjectDialog}>
         <AlertDialogContent>
