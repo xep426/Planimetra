@@ -263,12 +263,15 @@ export function ProjectPanel({
             </button>
             <div className="pt-1.5 border-t border-gray-800">
               <button onClick={onClearAll}
-                className="w-full px-3 py-2 rounded-lg flex items-center gap-2.5 text-sm bg-gray-800 text-red-400 hover:bg-gray-700 transition-colors"
+                className="w-full px-3 py-2 rounded-lg flex items-center gap-2.5 text-sm bg-gray-800 text-gray-200 hover:bg-gray-700 hover:text-white transition-colors"
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <polyline points="14 2 14 8 20 8" />
+                  <line x1="12" y1="18" x2="12" y2="12" />
+                  <line x1="9" y1="15" x2="15" y2="15" />
                 </svg>
-                Clear All
+                New Project
               </button>
             </div>
           </div>

@@ -52,7 +52,7 @@ function computeRoomAreaM2(nodes: Node[], walls: Wall[]): number | null {
   return Math.abs(area) / 2 / 10000; // cm² → m²
 }
 
-// ── Collapsible Section wrapper ──────────────────────────────────────────────
+// Collapsible Section wrapper 
 
 function CollapsibleSection({
   title, defaultOpen = true, borderBottom = true, children,
@@ -80,7 +80,7 @@ function CollapsibleSection({
   );
 }
 
-// ── Props ────────────────────────────────────────────────────────────────────
+// Props 
 
 interface RightPanelProps {
   // Panel state
@@ -213,7 +213,7 @@ export function RightPanel(props: RightPanelProps) {
 
   return (
     <>
-      {/* Toggle tab — small, near top, desktop only */}
+      {/* Toggle tab small, near top, desktop only */}
       <button
         onClick={onTogglePanel}
         className={`hidden md:flex fixed top-3 z-40 w-5 h-8 items-center justify-center
@@ -225,7 +225,7 @@ export function RightPanel(props: RightPanelProps) {
         <svg
           width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6b7280"
           strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-          className={`transition-transform ${panelOpen ? '' : 'rotate-180'}`}
+          className={`transition-transform ${!panelOpen ? '' : 'rotate-180'}`}
         >
           <polyline points="15 18 9 12 15 6" />
         </svg>
@@ -486,23 +486,20 @@ export function RightPanel(props: RightPanelProps) {
             </svg>
             Load Project
           </button>
-          <div className="pt-1.5 border-t border-gray-800">
             <button onClick={onClearAll}
-              className="w-full px-3 py-2 rounded-lg flex items-center gap-2.5 text-sm bg-gray-800 text-red-400 hover:bg-gray-700 transition-colors"
+              className="w-full px-3 py-2 rounded-lg flex items-center gap-2.5 text-sm bg-gray-800 text-gray-200 hover:bg-gray-700 hover:text-white transition-colors"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+                <line x1="12" y1="18" x2="12" y2="12" />
+                <line x1="9" y1="15" x2="15" y2="15" />
               </svg>
-              Clear All
+              New Project
             </button>
-          </div>
-        </div>
 
-        {/* Footer watermark */}
-        <div className="px-3 py-2 border-t border-gray-700/50 text-center">
-          <div className="text-[10px] text-gray-400">PLANIMETRA</div>
-          <div className="text-[10px] text-gray-500 mt-0.5">
-            © {new Date().getFullYear()} · <a href="mailto:mail@planimetra.com" className="text-cyan-600 hover:text-cyan-400 transition-colors">mail@planimetra.com</a>
+                   <div className="text-[10px] text-gray-500 text-center">
+            © {new Date().getFullYear()} · <a href="mailto:mail@planimetra.com" className="text-cyan-600 hover:text-cyan-400 transition-colors">PLANIMETRA</a>
           </div>
         </div>
       </div>

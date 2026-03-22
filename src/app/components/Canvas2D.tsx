@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 // Canvas2D — orchestration shell for 2D floor plan sketch
 import { exportToDXF as dxfExport } from '../utils/dxfExport';
 import type {
@@ -28,6 +28,10 @@ import {
   WallLengthDialog, CloseLoopDialog, WindowDialog, DoorDialog,
   PassageDialog, ColumnDialog, WallEditDialog, WallDeleteConfirmDialog,
 } from './dialogs';
+import {
+  AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel,
+} from './ui/alert-dialog';
 import { LayersDropdown, AppMenu, ActionBar, RightPanel } from './toolbar';
 import {
   type DrawContext, drawGrid, drawNodes, drawWalls, drawWallLabels, drawWindows,
@@ -42,6 +46,7 @@ export function Canvas2D() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const drawSceneRef = useRef<((ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) => void) | null>(null);
   const labelBoundsRef = useRef<LabelBounds[]>([]);
+  const [showNewProjectDialog, setShowNewProjectDialog] = useState(false);
 
   // ---- Centralised state (Phase 6) ------------------------------------------
 
@@ -206,6 +211,11 @@ export function Canvas2D() {
 
   const handleUndo = () => dispatch({ type: 'UNDO' });
   const handleRedo = () => dispatch({ type: 'REDO' });
+  const requestNewProject = () => setShowNewProjectDialog(true);
+  const confirmNewProject = () => {
+    setShowNewProjectDialog(false);
+    handleClearAll();
+  };
 
   // ---- undo/redo action labels (computed by diffing history entries) ----------
 
@@ -590,7 +600,7 @@ export function Canvas2D() {
         onExportDXF={exportToDXF}
         onSaveProject={handleSaveProject}
         onLoadProject={handleLoadProject}
-        onClearAll={handleClearAll}
+        onClearAll={requestNewProject}
         projectName={projectName}
         onProjectNameChange={setProjectName}
         rooms={getRoomsWithCurrent()}
@@ -616,7 +626,7 @@ export function Canvas2D() {
         onExportDXF={exportToDXF}
         onSaveProject={handleSaveProject}
         onLoadProject={handleLoadProject}
-        onClearAll={handleClearAll}
+        onClearAll={requestNewProject}
         historyIndex={historyIndex}
         historyLength={history.length}
         onUndo={handleUndo}
@@ -658,6 +668,23 @@ export function Canvas2D() {
         canDeleteWall={canDeleteSelectedWall}
         deleteWallDisabledReason={deleteWallDisabledReason}
       />
+
+      <AlertDialog open={showNewProjectDialog} onOpenChange={setShowNewProjectDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Start a new project?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will overwrite your current project. Save it first if you don’t want to lose any data.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction className="bg-red-600 text-white hover:bg-red-500" onClick={confirmNewProject}>
+              Start New Project
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <WallLengthDialog
         visible={showLengthPrompt}

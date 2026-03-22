@@ -220,15 +220,13 @@ export function useProjectManager({
   // ---- clear all -----------------------------------------------------------
 
   const handleClearAll = useCallback(() => {
-    if (confirm('Are you sure you want to clear all data? This will reset the entire project.')) {
-      dispatch({ type: 'CLEAR_ALL' });
-      localStorage.removeItem('planimetraAppState');
-      localStorage.removeItem('planimetraProject');
-      const freshId = `room-${Date.now()}`;
-      setProjectName('Untitled Project');
-      setRooms([createEmptyRoom(freshId, 'Room 1')]);
-      setActiveRoomId(freshId);
-    }
+    dispatch({ type: 'CLEAR_ALL' });
+    localStorage.removeItem('planimetraAppState');
+    localStorage.removeItem('planimetraProject');
+    const freshId = `room-${Date.now()}`;
+    setProjectName('Untitled Project');
+    setRooms([createEmptyRoom(freshId, 'Room 1')]);
+    setActiveRoomId(freshId);
   }, [dispatch]);
 
   // ---- localStorage persistence --------------------------------------------
