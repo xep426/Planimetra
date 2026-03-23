@@ -87,10 +87,14 @@ export function AppMenu({
           }
         </svg>
       </button>
-      {menuOpen && (
-        <>
-          <div className="md:hidden fixed inset-0 bg-black/40 z-40" onClick={onCloseMenu} />
-          <div className="md:hidden fixed top-0 right-0 bottom-0 w-[85vw] bg-gray-900 shadow-2xl z-50 flex flex-col">
+      <>
+          <div
+            className={`md:hidden fixed inset-0 bg-black/40 z-40 transition-opacity duration-200 ${menuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+            onClick={onCloseMenu}
+          />
+          <div
+            className={`md:hidden fixed top-0 right-0 bottom-0 w-[85vw] bg-gray-900 shadow-2xl z-50 flex flex-col transition-transform duration-200 will-change-transform ${menuOpen ? 'translate-x-0' : 'translate-x-full pointer-events-none'}`}
+          >
             {/* Header area with close button */}
             <div className="flex items-center justify-between px-4 pt-5 pb-3 border-b border-gray-700">
               <span className="text-sm text-gray-300 uppercase tracking-wider">Planimetra</span>
@@ -320,7 +324,6 @@ export function AppMenu({
             </div>
           </div>
         </>
-      )}
     </>
   );
 }

@@ -6,7 +6,7 @@ export function drawPreviewLine(
   preview: PreviewLine,
   dc: DrawContext,
 ) {
-  const { nodes, transform, pendingNode } = dc;
+  const { nodes, transform, pendingNode, closeLoopPreview } = dc;
   const fromNode = nodes.find(n => n.id === preview.fromNodeId);
   let fromX: number, fromY: number;
   if (!fromNode && pendingNode?.id === preview.fromNodeId) {
@@ -17,7 +17,8 @@ export function drawPreviewLine(
   } else return;
 
   const isSnapping = !!preview.snapNodeId;
-  ctx.strokeStyle = isSnapping ? '#888888' : '#555555';
+  const lineColor = closeLoopPreview ? '#22c55e' : (isSnapping ? '#888888' : '#555555');
+  ctx.strokeStyle = lineColor;
   ctx.lineWidth = 1.5 / transform.scale;
   ctx.lineCap = 'butt';
   ctx.setLineDash([8 / transform.scale, 8 / transform.scale]);
@@ -29,10 +30,10 @@ export function drawPreviewLine(
     ctx.beginPath(); ctx.arc(fromX, fromY, 4 / transform.scale, 0, Math.PI * 2); ctx.fill();
   }
   if (!isSnapping) {
-    ctx.strokeStyle = '#555555'; ctx.lineWidth = 1 / transform.scale;
+    ctx.strokeStyle = lineColor; ctx.lineWidth = 1 / transform.scale;
     ctx.beginPath(); ctx.arc(preview.toX, preview.toY, 4 / transform.scale, 0, Math.PI * 2); ctx.stroke();
   } else {
-    ctx.strokeStyle = '#888888'; ctx.lineWidth = 1.5 / transform.scale;
+    ctx.strokeStyle = lineColor; ctx.lineWidth = 1.5 / transform.scale;
     ctx.beginPath(); ctx.arc(preview.toX, preview.toY, 6 / transform.scale, 0, Math.PI * 2); ctx.stroke();
   }
 }

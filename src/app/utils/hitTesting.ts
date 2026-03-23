@@ -10,7 +10,7 @@ export function findNodeAt(
   nodes: Node[],
   scale: number
 ): Node | null {
-  const r = 15 / scale;
+  const r = 22 / scale;
   return nodes.find(n => Math.hypot(n.x - wx, n.y - wy) < r) ?? null;
 }
 
@@ -28,7 +28,7 @@ export function findNearbyNode(
   walls: Wall[],
   scale: number
 ): Node | null {
-  const r = 15 / scale;
+  const r = 22 / scale;
   return (
     nodes.find(
       n => n.id !== excludeId && nodeConnections(n.id, walls) < 2 && Math.hypot(n.x - wx, n.y - wy) < r
@@ -182,11 +182,12 @@ export function findColumnAt(
 export function findLabelAt(
   wx: number,
   wy: number,
-  labelBounds: LabelBounds[]
+  labelBounds: LabelBounds[],
+  padding: number = 0
 ): LabelBounds | null {
   for (const label of labelBounds) {
-    const halfW = label.width / 2;
-    const halfH = label.height / 2;
+    const halfW = label.width / 2 + padding;
+    const halfH = label.height / 2 + padding;
     if (
       wx >= label.x - halfW &&
       wx <= label.x + halfW &&

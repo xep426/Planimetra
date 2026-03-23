@@ -7,6 +7,7 @@ interface LayersDropdownProps {
   onToolChange: (tool: LayerType) => void;
   onToggleOpen: () => void;
   onClose: () => void;
+  adjacent?: React.ReactNode;
 }
 
 const LAYERS: { key: LayerType; label: string }[] = [
@@ -28,9 +29,10 @@ const TOOL_LABELS: Record<LayerType, string> = {
 export function LayersDropdown({
   selectedTool, layerOpen, loopClosed,
   onToolChange, onToggleOpen, onClose,
+  adjacent,
 }: LayersDropdownProps) {
   return (
-    <div className="fixed top-4 left-4 z-40">
+    <div className="fixed top-4 left-4 z-40 flex items-center gap-2">
       <button
         onClick={onToggleOpen}
         className="h-10 px-4 rounded-xl bg-white/90 backdrop-blur shadow-lg flex items-center gap-2 text-gray-800 hover:bg-white transition-all"
@@ -46,6 +48,7 @@ export function LayersDropdown({
           <polyline points="6 9 12 15 18 9" />
         </svg>
       </button>
+      {adjacent}
 
       {layerOpen && (
         <>

@@ -48,6 +48,9 @@ export function Canvas2D() {
   const labelBoundsRef = useRef<LabelBounds[]>([]);
   const [showNewProjectDialog, setShowNewProjectDialog] = useState(false);
   const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 });
+  const lastCornerToastRef = useRef<{ ts: number; msg: string | null }>({ ts: 0, msg: null });
+  const [cornerToast, setCornerToast] = useState<{ msg: string; visible: boolean }>({ msg: '', visible: false });
+  const cornerToastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // ---- Centralised state (Phase 6) ------------------------------------------
 
@@ -193,7 +196,7 @@ export function Canvas2D() {
     findColumnAtUtil(wx, wy, columns, walls, nodes, transform.scale);
 
   const findLabelAt = (wx: number, wy: number) =>
-    findLabelAtUtil(wx, wy, labelBoundsRef.current);
+    findLabelAtUtil(wx, wy, labelBoundsRef.current, 12 / transform.scale);
 
   // ---- angle helpers --------------------------------------------------------
 
@@ -379,6 +382,18 @@ export function Canvas2D() {
   // ---- node constraint toggle ------------------------------------------------
 
   const toggleNodeConstraint = (nodeId: string) => {
+    const isFree = nodeConstraints.has(nodeId);
+    const msg = isFree ? 'Corner Type: 90°' : 'Corner Type: Unconstrained';
+    const now = Date.now();
+    const last = lastCornerToastRef.current;
+    if (!(last.msg === msg && now - last.ts < 800)) {
+      if (cornerToastTimerRef.current) clearTimeout(cornerToastTimerRef.current);
+      setCornerToast({ msg, visible: true });
+      cornerToastTimerRef.current = setTimeout(() => {
+        setCornerToast(prev => ({ ...prev, visible: false }));
+      }, 1800);
+      lastCornerToastRef.current = { ts: now, msg };
+    }
     dispatch({ type: 'TOGGLE_NODE_CONSTRAINT', nodeId });
   };
 
@@ -666,6 +681,13 @@ export function Canvas2D() {
         onToolChange={setSelectedTool}
         onToggleOpen={() => setLayerOpen(!layerOpen)}
         onClose={() => setLayerOpen(false)}
+        adjacent={
+          <div
+            className={`h-10 px-4 rounded-xl bg-white/90 backdrop-blur shadow-lg flex items-center text-gray-800 text-sm transition-opacity duration-400 ${cornerToast.visible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+          >
+            {cornerToast.msg}
+          </div>
+        }
       />
 
       <AppMenu
