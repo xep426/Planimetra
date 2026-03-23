@@ -126,6 +126,7 @@
 
   body {
     @apply bg-background text-foreground;
+    overscroll-behavior: none;
   }
 
   /**
@@ -135,6 +136,7 @@
 
   html {
     font-size: var(--font-size);
+    overscroll-behavior: none;
   }
 
   h1 {

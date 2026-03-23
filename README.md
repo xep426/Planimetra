@@ -1,19 +1,19 @@
 # Planimetra
 
-A modern web application for creating and editing 2D floor plans and architectural sketches. Built with React, Vite, and Tailwind CSS.
+Yet another 2D floor‑plan sketcher — except it’s the one I wanted to use, so I built it (and I needed DXF export functionality).
 
 ## Features
 
-- ?? Interactive 2D canvas for drawing floor plans
-- ??? Support for walls, doors, windows, columns, and passages
-- ?? Precision measurements and geometry tools
-- ?? Advanced editing tools (wall deletion, height editing)
-- ?? Project file management and persistence
-- ?? Responsive design with mobile-friendly UI
-- ?? Undo/redo support
-- ?? Layer management
-- ?? DXF export for CAD compatibility
-- ?? PWA support for offline access
+- Interactive 2D canvas for drawing floor plans
+- Walls, doors, windows, columns, and passages
+- Precision measurements and geometry tools
+- Advanced editing tools (wall deletion, height editing)
+- Project file management and persistence
+- Responsive design with mobile-friendly UI
+- Undo/redo support
+- Layer management
+- DXF export for CAD compatibility
+- PWA support for offline access
 
 ## Getting Started
 
