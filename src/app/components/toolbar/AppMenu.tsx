@@ -106,7 +106,7 @@ export function AppMenu({
             </div>
 
             {/* Scrollable content */}
-            <div className="flex-1 overflow-y-auto px-4 py-3 space-y-4">
+            <div className="flex-1 overflow-y-auto px-4 py-3 space-y-4 flex flex-col">
 
               {/* ═══ PROJECT SECTION ═══ */}
               <div>
@@ -257,7 +257,7 @@ export function AppMenu({
               <div className="border-t border-gray-700" />
 
               {/* ═══ ACTIONS SECTION ═══ */}
-              <div className="space-y-2">
+              <div className="space-y-2 mt-auto">
                 {/* Undo / Redo — hidden on mobile, shown on desktop (mobile uses ActionBar) */}
                 <div className="hidden md:block space-y-2">
                   <button onClick={() => { onUndo(); }} disabled={historyIndex <= 0}
@@ -277,13 +277,6 @@ export function AppMenu({
                     {redoLabel && <span className="text-xs text-gray-400">{redoLabel}</span>}
                   </button>
                 </div>
-                <button onClick={() => { onExportDXF(); onCloseMenu(); }} disabled={!loopClosed}
-                  className={`w-full px-4 py-3 rounded-lg flex items-center gap-3 ${!loopClosed ? 'bg-gray-800 text-gray-500 cursor-not-allowed' : 'bg-gray-800 text-white hover:bg-gray-700'}`}>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
-                  </svg>
-                  Export DXF
-                </button>
                 <button onClick={() => { onSaveProject(); onCloseMenu(); }}
                   className="w-full px-4 py-3 rounded-lg flex items-center gap-3 bg-gray-800 text-white hover:bg-gray-700">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -308,19 +301,27 @@ export function AppMenu({
                   </svg>
                   New Project
                 </button>
+                <button onClick={() => { onExportDXF(); onCloseMenu(); }} disabled={!loopClosed}
+                  className={`w-full px-4 py-3 rounded-lg flex items-center gap-3 ${!loopClosed ? 'bg-gray-800 text-gray-500 cursor-not-allowed' : 'bg-gray-800 text-white hover:bg-gray-700'}`}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
+                  </svg>
+                  Export DXF
+                </button>
+                <div className="pt-3">
+                  <a
+                    href="https://github.com/xep426/Planimetra"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-2 text-[11px] text-gray-300 hover:text-white transition-colors"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                      <path d="M12 .5a12 12 0 0 0-3.79 23.4c.6.11.82-.26.82-.58v-2.1c-3.34.73-4.04-1.6-4.04-1.6-.55-1.4-1.34-1.78-1.34-1.78-1.1-.75.08-.74.08-.74 1.21.08 1.85 1.24 1.85 1.24 1.08 1.84 2.84 1.31 3.53 1 .11-.78.42-1.31.76-1.61-2.67-.31-5.47-1.34-5.47-5.95 0-1.31.47-2.38 1.24-3.22-.12-.31-.54-1.57.12-3.27 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.29-1.55 3.3-1.23 3.3-1.23.66 1.7.24 2.96.12 3.27.77.84 1.24 1.91 1.24 3.22 0 4.62-2.8 5.64-5.48 5.95.43.37.81 1.1.81 2.22v3.29c0 .32.22.69.83.58A12 12 0 0 0 12 .5Z" />
+                    </svg>
+                    Visit the project on GitHub
+                  </a>
+                </div>
               </div>
-            </div>
-
-            <div className="px-4 py-2 border-t border-gray-700/60">
-              <a
-                href="https://github.com/xep426/Planimetra"
-                className="flex items-center justify-center gap-2 text-[11px] text-gray-300 hover:text-white transition-colors"
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                  <path d="M12 .5a12 12 0 0 0-3.79 23.4c.6.11.82-.26.82-.58v-2.1c-3.34.73-4.04-1.6-4.04-1.6-.55-1.4-1.34-1.78-1.34-1.78-1.1-.75.08-.74.08-.74 1.21.08 1.85 1.24 1.85 1.24 1.08 1.84 2.84 1.31 3.53 1 .11-.78.42-1.31.76-1.61-2.67-.31-5.47-1.34-5.47-5.95 0-1.31.47-2.38 1.24-3.22-.12-.31-.54-1.57.12-3.27 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.29-1.55 3.3-1.23 3.3-1.23.66 1.7.24 2.96.12 3.27.77.84 1.24 1.91 1.24 3.22 0 4.62-2.8 5.64-5.48 5.95.43.37.81 1.1.81 2.22v3.29c0 .32.22.69.83.58A12 12 0 0 0 12 .5Z" />
-                </svg>
-                Visit the project on GitHub
-              </a>
             </div>
           </div>
         </>

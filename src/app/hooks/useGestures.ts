@@ -280,7 +280,12 @@ export function useGestures(p: UseGesturesParams) {
 
     // Node tap in wall mode: toggle constraint
     if (p.selectedTool === 'wall') {
+      const hitWall = p.findWallAt(wx, wy);
       const node = p.findNodeAt(wx, wy);
+      if (hitWall && (!node || Math.hypot(node.x - wx, node.y - wy) > 12 / p.transform.scale)) {
+        clearSelections(); p.setSelectedWallId(hitWall.id);
+        return;
+      }
       if (node) {
         p.toggleNodeConstraint(node.id);
         return;
@@ -318,6 +323,9 @@ export function useGestures(p: UseGesturesParams) {
     dragSourceRef.current = nodeId;
     isDraggingWallRef.current = true;
   };
+
+  const canStartWallFromNode = (nodeId: string) =>
+    p.nodeConnections(nodeId) < 2;
 
   const findNearbyNodeWithRadius = (wx: number, wy: number, excludeId: string, radiusPx: number) => {
     const r = radiusPx / p.transform.scale;
@@ -375,7 +383,7 @@ export function useGestures(p: UseGesturesParams) {
     // Is the source node unconstrained (free angle)?
     const isFreeAngle = p.nodeConstraints.has(dragSourceRef.current);
 
-    if (nearNode) {
+    if (nearNode && p.nodeConnections(nearNode.id) < 2) {
       _lastPreviewDir = null; // snapping to node, no direction needed
       const preview: PreviewLine = {
         fromNodeId: dragSourceRef.current,
@@ -495,7 +503,7 @@ export function useGestures(p: UseGesturesParams) {
       }
     }
 
-    if (nearNode) {
+    if (nearNode && p.nodeConnections(nearNode.id) < 2) {
       // Check if wall already exists between these nodes
       const existsAlready = p.walls.some(
         w => (w.nodeA === sourceId && w.nodeB === nearNode.id) ||
@@ -602,10 +610,15 @@ export function useGestures(p: UseGesturesParams) {
     if (p.selectedTool === 'wall') {
       const hitNode = p.findNodeAt(wx, wy);
       if (hitNode) {
+        if (canStartWallFromNode(hitNode.id)) {
+          dragStartScreenRef.current = { x: sx, y: sy };
+          dragSourceRef.current = hitNode.id;
+          isDraggingWallRef.current = false; // not dragging yet, waiting for threshold
+          _lastPreviewDir = null; // reset for new drag
+          return;
+        }
         dragStartScreenRef.current = { x: sx, y: sy };
-        dragSourceRef.current = hitNode.id;
-        isDraggingWallRef.current = false; // not dragging yet, waiting for threshold
-        _lastPreviewDir = null; // reset for new drag
+        lastPanRef.current = { x: sx, y: sy };
         return;
       }
     }
@@ -750,10 +763,15 @@ export function useGestures(p: UseGesturesParams) {
         const { x: wx, y: wy } = p.screenToWorld(t.x, t.y);
         const hitNode = p.findNodeAt(wx, wy);
         if (hitNode) {
+          if (canStartWallFromNode(hitNode.id)) {
+            dragStartScreenRef.current = { x: t.x, y: t.y };
+            dragSourceRef.current = hitNode.id;
+            isDraggingWallRef.current = false;
+            _lastPreviewDir = null; // reset for new drag
+            return;
+          }
+          lastPanRef.current = { x: t.x, y: t.y };
           dragStartScreenRef.current = { x: t.x, y: t.y };
-          dragSourceRef.current = hitNode.id;
-          isDraggingWallRef.current = false;
-          _lastPreviewDir = null; // reset for new drag
           return;
         }
       }
