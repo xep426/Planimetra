@@ -308,7 +308,7 @@ export function AppMenu({
                   </svg>
                   Export DXF
                 </button>
-                <div className="pt-3">
+                <div className="pt-1">
                   <a
                     href="https://github.com/xep426/Planimetra"
                     target="_blank"

@@ -495,7 +495,7 @@ export function RightPanel(props: RightPanelProps) {
               </svg>
               Export DXF
             </button>
-            <div className="pt-1 pb-1">
+            <div className="pt-1 pb-0.3">
               <a
                 href="https://github.com/xep426/Planimetra"
                 target="_blank"
