@@ -18,7 +18,7 @@ export interface DrawContext {
   selectedDoorId: string | null;
   selectedPassageId: string | null;
   selectedColumnId: string | null;
-  nodeConstraints: Set<string>;
+  unconstrainedNodes: Set<string>;
   wallInteriorSign: Map<string, number>;
   columnsToJoin: string[];
   columnJoinMode: boolean;
@@ -32,3 +32,4 @@ export interface DrawContext {
   /** Current room name for the room label. */
   roomName: string;
 }
+

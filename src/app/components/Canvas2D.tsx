@@ -22,7 +22,7 @@ import {
 } from '../utils/wallGeometry';
 import {
   detectOpenLoop as detectOpenLoopUtil, findChain as findChainUtil,
-  solveClosedLoop as solveClosedLoopUtil
+  solveClosedLoop as solveClosedLoopUtil,
 } from '../utils/solver';
 import {
   WallLengthDialog, CloseLoopDialog, WindowDialog, DoorDialog,
@@ -51,6 +51,7 @@ export function Canvas2D() {
   const lastCornerToastRef = useRef<{ ts: number; msg: string | null }>({ ts: 0, msg: null });
   const [cornerToast, setCornerToast] = useState<{ msg: string; visible: boolean }>({ msg: '', visible: false });
   const cornerToastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const closeLoopSourceRef = useRef<string | null>(null);
 
   // ---- Centralised state (Phase 6) ------------------------------------------
 
@@ -60,7 +61,7 @@ export function Canvas2D() {
     setPreviewLine, setShowLengthPrompt, setPendingConnection,
     setLengthInput, setSelectedWallId, setSelectedTool,
     setShowCloseLoopPrompt, setCloseLoopLength, setOpenLoopEndpoints,
-    setValidationError, setNodeConstraints,
+    setValidationError, setUnconstrainedNodes,
     setMenuOpen, setLayerOpen,
     setSelectedWindowId, setSelectedDoorId, setSelectedPassageId, setSelectedColumnId,
     setColumnJoinMode, setColumnsToJoin,
@@ -73,7 +74,7 @@ export function Canvas2D() {
     selectedTool, selectedWallId, selectedWindowId, selectedDoorId,
     selectedPassageId, selectedColumnId,
     columnJoinMode, columnsToJoin,
-    previewLine, snapToGridEnabled, nodeConstraints,
+    previewLine, snapToGridEnabled, unconstrainedNodes,
     showLengthPrompt, pendingConnection, lengthInput,
     showCloseLoopPrompt, closeLoopLength, openLoopEndpoints,
     validationError,
@@ -92,7 +93,7 @@ export function Canvas2D() {
     handleSaveProject, handleLoadProject, handleClearAll,
   } = useProjectManager({
     nodes, walls, windows, doors, passages, columns,
-    history, historyIndex, transform, nodeConstraints, selectedTool,
+    history, historyIndex, transform, unconstrainedNodes, selectedTool,
     dispatch,
   });
 
@@ -375,15 +376,15 @@ export function Canvas2D() {
 
   const { handleEditWallClick, handleDeleteWallClick, canDeleteSelectedWall, deleteWallDisabledReason, wallEditDialogProps, wallDeleteConfirmProps } = useWallCrud({
     nodes, walls, windows, doors, passages, columns,
-    selectedWallId, setSelectedWallId, nodeConstraints,
+    selectedWallId, setSelectedWallId, unconstrainedNodes,
     saveHistory, setValidationError,
   });
 
   // ---- node constraint toggle ------------------------------------------------
 
   const toggleNodeConstraint = (nodeId: string) => {
-    const isFree = nodeConstraints.has(nodeId);
-    const msg = isFree ? 'Corner Type: 90\u00B0' : 'Corner Type: Unconstrained';
+    const willBeUnconstrained = !unconstrainedNodes.has(nodeId);
+    const msg = willBeUnconstrained ? 'Corner Type: Unconstrained' : 'Corner Type: 90\u00B0';
     const now = Date.now();
     const last = lastCornerToastRef.current;
     if (!(last.msg === msg && now - last.ts < 800)) {
@@ -400,7 +401,8 @@ export function Canvas2D() {
   // ---- Gesture hook (Phase 5) ------------------------------------------------
 
   /** Called when user drags from one open-loop endpoint to the other */
-  const handleCloseLoopDrag = (_sourceNodeId: string, _targetNodeId: string) => {
+  const handleCloseLoopDrag = (sourceNodeId: string, _targetNodeId: string) => {
+    closeLoopSourceRef.current = sourceNodeId;
     setCloseLoopLength('');
     setValidationError(null);
     setShowCloseLoopPrompt(true);
@@ -418,7 +420,7 @@ export function Canvas2D() {
     snapToGridEnabled,
     columnJoinMode, columnsToJoin, labelBoundsRef,
     loopClosed: isLoopClosed(),
-    nodeConstraints,
+    unconstrainedNodes,
     openLoopEndpoints,
     setTransform, setPreviewLine, setSelectedTool,
     setSelectedWallId, setSelectedWindowId, setSelectedDoorId,
@@ -454,7 +456,7 @@ export function Canvas2D() {
       nodes, walls, windows, doors, passages, columns,
       transform, selectedTool,
       selectedWallId, selectedWindowId, selectedDoorId, selectedPassageId, selectedColumnId,
-      nodeConstraints, wallInteriorSign, columnsToJoin, columnJoinMode,
+      unconstrainedNodes, wallInteriorSign, columnsToJoin, columnJoinMode,
       loopClosed: isLoopClosed(),
       closeLoopPreview,
       labelBounds: labelBoundsArr,
@@ -492,7 +494,7 @@ export function Canvas2D() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     renderScene(ctx, canvas);
-  }, [transform, nodes, walls, previewLine, openLoopEndpoints, selectedWallId, nodeConstraints, windows, selectedWindowId, doors, selectedDoorId, passages, selectedPassageId, columns, selectedColumnId, selectedTool, columnsToJoin, columnJoinMode, activeRoomName]);
+  }, [transform, nodes, walls, previewLine, openLoopEndpoints, selectedWallId, unconstrainedNodes, windows, selectedWindowId, doors, selectedDoorId, passages, selectedPassageId, columns, selectedColumnId, selectedTool, columnsToJoin, columnJoinMode, activeRoomName]);
 
   // ---- DXF Export ------------------------------------------------------------
 
@@ -513,8 +515,10 @@ export function Canvas2D() {
     chainNodeIds: string[],
     wallLengthsCm: number[],
     closingLengthCm: number,
-    uncons: Set<string>
-  ) => solveClosedLoopUtil(chainNodeIds, wallLengthsCm, closingLengthCm, uncons, nodes);
+    uncons: Set<string>,
+    sourceNodeId?: string
+  ) => solveClosedLoopUtil(chainNodeIds, wallLengthsCm, closingLengthCm, uncons, nodes, sourceNodeId);
+
 
   // ---- close-loop action -----------------------------------------------------
 
@@ -527,7 +531,15 @@ export function Canvas2D() {
       return;
     }
 
-    const chain = findChain(openLoopEndpoints.nodeA, openLoopEndpoints.nodeB);
+    const sourceId = closeLoopSourceRef.current;
+    const isSourceEndpoint =
+      sourceId === openLoopEndpoints.nodeA || sourceId === openLoopEndpoints.nodeB;
+    const nodeA = isSourceEndpoint ? sourceId! : openLoopEndpoints.nodeA;
+    const nodeB = isSourceEndpoint
+      ? (sourceId === openLoopEndpoints.nodeA ? openLoopEndpoints.nodeB : openLoopEndpoints.nodeA)
+      : openLoopEndpoints.nodeB;
+
+    const chain = findChain(nodeA, nodeB);
     if (!chain || chain.nodeIds.length < 3) {
       setValidationError('Need at least 3 walls before closing a loop.');
       return;
@@ -537,7 +549,8 @@ export function Canvas2D() {
       chain.nodeIds,
       chain.wallLengthsCm,
       desiredMeters * 100,
-      nodeConstraints
+      unconstrainedNodes,
+      sourceId ?? undefined
     );
 
     if (!solvedNodes) {
@@ -752,7 +765,7 @@ export function Canvas2D() {
         selectedColumnId={selectedColumnId}
         columnJoinMode={columnJoinMode}
         columnsToJoin={columnsToJoin}
-        nodeConstraints={nodeConstraints}
+        unconstrainedNodes={unconstrainedNodes}
         wallInteriorSign={wallInteriorSign}
         calculateNodeLabels={calculateNodeLabels}
         saveHistory={saveHistory}
@@ -862,3 +875,4 @@ export function Canvas2D() {
     </>
   );
 }
+

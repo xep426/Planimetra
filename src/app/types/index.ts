@@ -115,7 +115,7 @@ export interface RoomData {
   history: HistoryEntry[];
   historyIndex: number;
   transform: Transform;
-  nodeConstraints: string[]; // serialised Set<string>
+  unconstrainedNodes: string[]; // serialised Set<string>
   selectedTool: LayerType;
 }
 

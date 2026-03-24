@@ -21,7 +21,7 @@ interface UseProjectManagerParams {
   history: HistoryEntry[];
   historyIndex: number;
   transform: Transform;
-  nodeConstraints: Set<string>;
+  unconstrainedNodes: Set<string>;
   selectedTool: LayerType;
 
   // Reducer dispatch (for LOAD_STATE / CLEAR_ALL)
@@ -78,7 +78,7 @@ function createEmptyRoom(id: string, name: string): RoomData {
     }],
     historyIndex: 0,
     transform: { x: 0, y: 0, scale: 1, rotation: 0 },
-    nodeConstraints: [],
+    unconstrainedNodes: [],
     selectedTool: 'wall',
   };
 }
@@ -89,7 +89,7 @@ function createEmptyRoom(id: string, name: string): RoomData {
 
 export function useProjectManager({
   nodes, walls, windows, doors, passages, columns,
-  history, historyIndex, transform, nodeConstraints, selectedTool,
+  history, historyIndex, transform, unconstrainedNodes, selectedTool,
   dispatch,
 }: UseProjectManagerParams): ProjectManagerResult {
 
@@ -114,11 +114,11 @@ export function useProjectManager({
       name: room?.name ?? 'Room',
       nodes, walls, windows, doors, passages, columns,
       history, historyIndex, transform,
-      nodeConstraints: Array.from(nodeConstraints),
+      unconstrainedNodes: Array.from(unconstrainedNodes),
       selectedTool,
     };
   }, [activeRoomId, rooms, nodes, walls, windows, doors, passages, columns,
-      history, historyIndex, transform, nodeConstraints, selectedTool]);
+      history, historyIndex, transform, unconstrainedNodes, selectedTool]);
 
   const loadRoomIntoReducer = useCallback((room: RoomData) => {
     dispatch({
@@ -136,7 +136,7 @@ export function useProjectManager({
         }],
         historyIndex: room.historyIndex,
         transform: room.transform,
-        nodeConstraints: new Set(room.nodeConstraints),
+        unconstrainedNodes: new Set(room.unconstrainedNodes),
         selectedTool: room.selectedTool as any,
         selectedWallId: null, selectedWindowId: null,
         selectedDoorId: null, selectedPassageId: null, selectedColumnId: null,
@@ -273,7 +273,7 @@ export function useProjectManager({
           }],
           historyIndex: parsed.historyIndex ?? 0,
           transform: parsed.transform ?? { x: 0, y: 0, scale: 1, rotation: 0 },
-          nodeConstraints: parsed.nodeConstraints ?? [],
+          unconstrainedNodes: parsed.unconstrainedNodes ?? [],
           selectedTool: parsed.selectedTool ?? 'wall',
         };
         setRooms([legacyRoom]);
@@ -296,7 +296,7 @@ export function useProjectManager({
       console.error('Failed to save state to localStorage:', error);
     }
   }, [nodes, walls, windows, doors, passages, columns, selectedTool,
-      history, historyIndex, transform, nodeConstraints,
+      history, historyIndex, transform, unconstrainedNodes,
       projectName, rooms, activeRoomId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ---- public API ----------------------------------------------------------
@@ -310,3 +310,4 @@ export function useProjectManager({
     handleSaveProject, handleLoadProject, handleClearAll,
   };
 }
+

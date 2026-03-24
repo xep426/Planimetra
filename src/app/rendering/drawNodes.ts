@@ -7,7 +7,7 @@ export function drawNodes(ctx: CanvasRenderingContext2D, dc: DrawContext) {
 
   dc.nodes.forEach(node => {
     const r = 5 / dc.transform.scale;
-    const unconstrained = dc.nodeConstraints.has(node.id);
+    const unconstrained = dc.unconstrainedNodes.has(node.id);
 
     // Filled solid circle - gray out when not in wall mode
     ctx.fillStyle = '#ffffff';

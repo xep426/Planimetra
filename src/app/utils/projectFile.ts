@@ -20,7 +20,7 @@ export interface ProjectData {
   history: HistoryEntry[];
   historyIndex: number;
   transform: Transform;
-  nodeConstraints: string[];
+  unconstrainedNodes: string[];
 }
 
 const CURRENT_VERSION = 2; // v2 = multi-room
@@ -99,7 +99,7 @@ function legacyToRoom(parsed: any): RoomData {
     }],
     historyIndex: parsed.historyIndex ?? 0,
     transform: parsed.transform ?? { x: 0, y: 0, scale: 1, rotation: 0 },
-    nodeConstraints: parsed.nodeConstraints ?? [],
+    unconstrainedNodes: parsed.unconstrainedNodes ?? [],
     selectedTool: parsed.selectedTool ?? 'wall',
   };
 }
@@ -241,7 +241,7 @@ export function loadProject(): Promise<ProjectData> {
             history: parsed.history ?? [{ nodes: parsed.nodes, walls: parsed.walls, windows: [], doors: [], passages: [], columns: [] }],
             historyIndex: parsed.historyIndex ?? 0,
             transform: parsed.transform ?? { x: 0, y: 0, scale: 1, rotation: 0 },
-            nodeConstraints: parsed.nodeConstraints ?? [],
+            unconstrainedNodes: parsed.unconstrainedNodes ?? [],
           };
 
           resolve(project);

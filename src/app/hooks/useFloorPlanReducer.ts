@@ -40,7 +40,7 @@ export interface FloorPlanState {
   snapToGridEnabled: boolean;
 
   // Node constraints (unconstrained node set)
-  nodeConstraints: Set<string>;
+  unconstrainedNodes: Set<string>;
 
   // Wall-length dialog
   showLengthPrompt: boolean;
@@ -97,7 +97,7 @@ export const INITIAL_STATE: FloorPlanState = {
   previewLine: null,
   snapToGridEnabled: true,
 
-  nodeConstraints: new Set(),
+  unconstrainedNodes: new Set(),
 
   showLengthPrompt: false,
   pendingConnection: null,
@@ -137,8 +137,8 @@ type UpdateTransformAction = {
   updater: (prev: Transform) => Transform;
 };
 
-type UpdateNodeConstraintsAction = {
-  type: 'UPDATE_NODE_CONSTRAINTS';
+type UpdateUnconstrainedNodesAction = {
+  type: 'UPDATE_UNCONSTRAINED_NODES';
   updater: (prev: Set<string>) => Set<string>;
 };
 
@@ -173,7 +173,7 @@ type ToggleNodeConstraintAction = {
 export type FloorPlanAction =
   | SetFieldAction
   | UpdateTransformAction
-  | UpdateNodeConstraintsAction
+  | UpdateUnconstrainedNodesAction
   | SaveHistoryAction
   | UndoAction
   | RedoAction
@@ -219,8 +219,8 @@ export function floorPlanReducer(state: FloorPlanState, action: FloorPlanAction)
     case 'UPDATE_TRANSFORM':
       return { ...state, transform: action.updater(state.transform) };
 
-    case 'UPDATE_NODE_CONSTRAINTS':
-      return { ...state, nodeConstraints: action.updater(state.nodeConstraints) };
+    case 'UPDATE_UNCONSTRAINED_NODES':
+      return { ...state, unconstrainedNodes: action.updater(state.unconstrainedNodes) };
 
     case 'SAVE_HISTORY': {
       const h = state.history.slice(0, state.historyIndex + 1);
@@ -267,10 +267,10 @@ export function floorPlanReducer(state: FloorPlanState, action: FloorPlanAction)
       return { ...state, ...action.payload };
 
     case 'TOGGLE_NODE_CONSTRAINT': {
-      const next = new Set(state.nodeConstraints);
+      const next = new Set(state.unconstrainedNodes);
       if (next.has(action.nodeId)) next.delete(action.nodeId);
       else next.add(action.nodeId);
-      return { ...state, nodeConstraints: next };
+      return { ...state, unconstrainedNodes: next };
     }
 
     default:
@@ -309,7 +309,7 @@ export interface FloorPlanSetters {
   setCloseLoopLength: Setter<string>;
   setOpenLoopEndpoints: Setter<{ nodeA: string; nodeB: string } | null>;
   setValidationError: Setter<string | null>;
-  setNodeConstraints: DispatchSetter<Set<string>>;
+  setUnconstrainedNodes: DispatchSetter<Set<string>>;
   setIsPanMode: Setter<boolean>;
   setShowModeIndicator: Setter<boolean>;
   setMenuOpen: Setter<boolean>;
@@ -334,7 +334,7 @@ export function useFloorPlanReducer() {
     [],
   );
 
-  // -- Functional-updater-aware setters for transform & nodeConstraints ------
+  // -- Functional-updater-aware setters for transform & unconstrainedNodes ------
   const setTransform: DispatchSetter<Transform> = useCallback(
     (v) => {
       if (typeof v === 'function') dispatch({ type: 'UPDATE_TRANSFORM', updater: v });
@@ -343,10 +343,10 @@ export function useFloorPlanReducer() {
     [],
   );
 
-  const setNodeConstraints: DispatchSetter<Set<string>> = useCallback(
+  const setUnconstrainedNodes: DispatchSetter<Set<string>> = useCallback(
     (v) => {
-      if (typeof v === 'function') dispatch({ type: 'UPDATE_NODE_CONSTRAINTS', updater: v });
-      else dispatch({ type: 'SET', field: 'nodeConstraints', value: v });
+      if (typeof v === 'function') dispatch({ type: 'UPDATE_UNCONSTRAINED_NODES', updater: v });
+      else dispatch({ type: 'SET', field: 'unconstrainedNodes', value: v });
     },
     [],
   );
@@ -375,7 +375,7 @@ export function useFloorPlanReducer() {
     setCloseLoopLength:     useCallback((v: string)                => set('closeLoopLength', v), [set]),
     setOpenLoopEndpoints:   useCallback((v: { nodeA: string; nodeB: string } | null) => set('openLoopEndpoints', v), [set]),
     setValidationError:     useCallback((v: string | null)         => set('validationError', v), [set]),
-    setNodeConstraints,
+    setUnconstrainedNodes,
     setIsPanMode:           useCallback((v: boolean)               => set('isPanMode', v), [set]),
     setShowModeIndicator:   useCallback((v: boolean)               => set('showModeIndicator', v), [set]),
     setMenuOpen:            useCallback((v: boolean)               => set('menuOpen', v), [set]),
@@ -392,3 +392,4 @@ export function useFloorPlanReducer() {
 
   return { state, dispatch, ...setters };
 }
+

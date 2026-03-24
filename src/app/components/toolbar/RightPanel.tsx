@@ -127,7 +127,7 @@ interface RightPanelProps {
   selectedColumnId: string | null;
   columnJoinMode: boolean;
   columnsToJoin: string[];
-  nodeConstraints: Set<string>;
+  unconstrainedNodes: Set<string>;
   wallInteriorSign: Map<string, number>;
   calculateNodeLabels: (wallId: string) => { nodeALabel: 'CW' | 'CCW'; nodeBLabel: 'CW' | 'CCW' };
   saveHistory: (
@@ -164,7 +164,7 @@ export function RightPanel(props: RightPanelProps) {
     // editor
     selectedTool, nodes, walls, windows, doors, passages, columns,
     selectedWallId, selectedWindowId, selectedDoorId, selectedPassageId, selectedColumnId,
-    columnJoinMode, columnsToJoin, nodeConstraints, wallInteriorSign,
+    columnJoinMode, columnsToJoin, unconstrainedNodes, wallInteriorSign,
     calculateNodeLabels, saveHistory,
     setSelectedWindowId, setSelectedDoorId, setSelectedPassageId, setSelectedColumnId,
     setValidationError,
@@ -401,7 +401,7 @@ export function RightPanel(props: RightPanelProps) {
               selectedColumnId={selectedColumnId}
               columnJoinMode={columnJoinMode}
               columnsToJoin={columnsToJoin}
-              nodeConstraints={nodeConstraints}
+              unconstrainedNodes={unconstrainedNodes}
               wallInteriorSign={wallInteriorSign}
               calculateNodeLabels={calculateNodeLabels}
               saveHistory={saveHistory}
@@ -514,3 +514,4 @@ export function RightPanel(props: RightPanelProps) {
     </>
   );
 }
+

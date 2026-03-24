@@ -18,7 +18,7 @@ interface EditorSectionProps {
   selectedColumnId: string | null;
   columnJoinMode: boolean;
   columnsToJoin: string[];
-  nodeConstraints: Set<string>;
+  unconstrainedNodes: Set<string>;
   wallInteriorSign: Map<string, number>;
   calculateNodeLabels: (wallId: string) => { nodeALabel: 'CW' | 'CCW'; nodeBLabel: 'CW' | 'CCW' };
   saveHistory: (
@@ -68,9 +68,9 @@ function moveNodeBAlongWall(nodes: Node[], wall: Wall, newLengthM: number): Node
 }
 
 // --- Wall Editor ---------------------------------------------------
-function WallEditor({ wall, nodes, walls, nodeConstraints, saveHistory, setValidationError, onDeleteWall, canDeleteWall, deleteDisabledReason }: {
+function WallEditor({ wall, nodes, walls, unconstrainedNodes, saveHistory, setValidationError, onDeleteWall, canDeleteWall, deleteDisabledReason }: {
   wall: Wall; nodes: Node[]; walls: Wall[];
-  nodeConstraints: Set<string>;
+  unconstrainedNodes: Set<string>;
   saveHistory: (n: Node[], w: Wall[]) => void;
   setValidationError: (error: string | null) => void;
   onDeleteWall: () => void;
@@ -111,7 +111,7 @@ function WallEditor({ wall, nodes, walls, nodeConstraints, saveHistory, setValid
             chain.nodeIds,
             chain.wallLengthsCm,
             newLengthM * 100,
-            nodeConstraints,
+            unconstrainedNodes,
             nodes
           );
 
@@ -518,7 +518,7 @@ export function EditorSection(props: EditorSectionProps) {
     selectedTool, nodes, walls, windows, doors, passages, columns,
     selectedWallId, selectedWindowId, selectedDoorId, selectedPassageId, selectedColumnId,
     columnJoinMode, columnsToJoin,
-    nodeConstraints,
+    unconstrainedNodes,
     wallInteriorSign,
     calculateNodeLabels, saveHistory,
     setSelectedWindowId, setSelectedDoorId, setSelectedPassageId, setSelectedColumnId,
@@ -542,7 +542,7 @@ export function EditorSection(props: EditorSectionProps) {
     return (
       <div>
         <h4 className="text-[11px] text-gray-400 uppercase tracking-wider mb-2">Wall</h4>
-        <WallEditor wall={selectedWall} nodes={nodes} walls={walls} nodeConstraints={nodeConstraints} saveHistory={saveHistory} setValidationError={setValidationError} onDeleteWall={onDeleteWall} canDeleteWall={canDeleteWall} deleteDisabledReason={deleteWallDisabledReason} />
+        <WallEditor wall={selectedWall} nodes={nodes} walls={walls} unconstrainedNodes={unconstrainedNodes} saveHistory={saveHistory} setValidationError={setValidationError} onDeleteWall={onDeleteWall} canDeleteWall={canDeleteWall} deleteDisabledReason={deleteWallDisabledReason} />
       </div>
     );
   }
@@ -699,3 +699,4 @@ export function EditorSection(props: EditorSectionProps) {
 
   return <p className="text-gray-500 text-xs italic">Select an element to edit</p>;
 }
+

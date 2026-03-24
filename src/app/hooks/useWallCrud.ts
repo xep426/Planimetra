@@ -12,7 +12,7 @@ interface UseWallCrudParams {
   columns: ColumnObj[];
   selectedWallId: string | null;
   setSelectedWallId: (id: string | null) => void;
-  nodeConstraints: Set<string>;
+  unconstrainedNodes: Set<string>;
   saveHistory: (
     nodes: Node[], walls: Wall[],
     windows?: WindowObj[], doors?: DoorObj[],
@@ -55,7 +55,7 @@ function buildCascadeMessage(cascade: ReturnType<typeof getCascadeInfo>): string
 
 export function useWallCrud({
   nodes, walls, windows, doors, passages, columns,
-  selectedWallId, setSelectedWallId, nodeConstraints,
+  selectedWallId, setSelectedWallId, unconstrainedNodes,
   saveHistory, setValidationError,
 }: UseWallCrudParams) {
   const [showWallEditPrompt, setShowWallEditPrompt] = useState(false);
@@ -126,7 +126,7 @@ export function useWallCrud({
         if (chain && chain.nodeIds.length >= 3) {
           const solvedNodes = solveClosedLoop(
             chain.nodeIds, chain.wallLengthsCm,
-            newLengthM * 100, nodeConstraints, nodes
+            newLengthM * 100, unconstrainedNodes, nodes
           );
 
           if (solvedNodes) {
@@ -256,3 +256,4 @@ function moveNodeBAlongWall(nodes: Node[], wall: Wall, newLengthM: number): Node
       : n
   );
 }
+
