@@ -703,6 +703,7 @@ export function useGestures(p: UseGesturesParams) {
       const moved = Math.abs(sx - (dragStartScreenRef.current?.x ?? sx)) > 3 ||
                     Math.abs(sy - (dragStartScreenRef.current?.y ?? sy)) > 3;
       lastPanRef.current = null;
+      dragStartScreenRef.current = null;
       if (!moved) {
         processTap(sx, sy);
       }
