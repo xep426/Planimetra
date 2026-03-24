@@ -26,7 +26,7 @@ export interface DrawContext {
   loopClosed: boolean;
   /** True while dragging from one open endpoint to the other (close-loop preview). */
   closeLoopPreview: boolean;
-  /** Mutable array — drawWalls populates it, subsequent drawers append to it. */
+  /** Mutable array -- drawWalls populates it, subsequent drawers append to it. */
   labelBounds: LabelBounds[];
   pendingNode: { id: string; x: number; y: number } | null;
   /** Current room name for the room label. */

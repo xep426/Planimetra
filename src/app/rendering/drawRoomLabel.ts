@@ -2,7 +2,7 @@ import type { DrawContext } from './types';
 import { computePolygonAreaAndCentroid } from '../utils/geometry';
 
 /**
- * Draw the room name and area (m²) label at the centroid of the closed wall loop.
+ * Draw the room name and area (m^2) label at the centroid of the closed wall loop.
  * Styled to match the sketch canvas labels (dark background, monospace, light text).
  * Only renders when 3+ walls form a closed polygon.
  */
@@ -31,7 +31,7 @@ export function drawRoomLabel(ctx: CanvasRenderingContext2D, dc: DrawContext) {
   // Only render if the loop actually closed back to the start
   if (currentNodeId !== firstWall.nodeA || orderedNodeIds.length < 3) return;
 
-  // Map node IDs → coordinates
+  // Map node IDs -> coordinates
   const points = orderedNodeIds
     .map(id => nodes.find(n => n.id === id))
     .filter((n): n is { id: string; x: number; y: number } => n != null);
@@ -41,10 +41,10 @@ export function drawRoomLabel(ctx: CanvasRenderingContext2D, dc: DrawContext) {
   const result = computePolygonAreaAndCentroid(points);
   if (!result) return;
 
-  // Coordinates are in cm; convert area to m²
+  // Coordinates are in cm; convert area to m^2
   let areaSqM = result.area / 10000;
 
-  // Subtract column footprints (width × depth are in meters)
+  // Subtract column footprints (width x depth are in meters)
   for (const col of columns) {
     areaSqM -= col.width * col.depth;
     // Also subtract any merged shapes on this column

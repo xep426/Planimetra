@@ -1,6 +1,6 @@
 # Planimetra
 
-Yet another 2D floor‑plan sketcher — except it’s the one I wanted to use, so I built it (and I needed DXF export functionality).
+Yet another 2D floor-plan sketcher -- except it's the one I wanted to use, so I built it (and I needed DXF export functionality).
 
 ## Features
 

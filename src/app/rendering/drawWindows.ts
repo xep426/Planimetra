@@ -109,7 +109,7 @@ export function drawWindows(ctx: CanvasRenderingContext2D, dc: DrawContext) {
 
     // Draw label on the SAME side as the swing arc
     ctx.font = '9px monospace';
-    const txt = `Window ${win.width.toFixed(2)}×${win.height.toFixed(2)} m`;
+    const txt = `Window ${win.width.toFixed(2)}\u00D7${win.height.toFixed(2)} m`;
     const tw = ctx.measureText(txt).width;
     const rw = (tw + 8) / transform.scale;
     const rh = 14 / transform.scale;

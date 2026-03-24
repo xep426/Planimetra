@@ -15,7 +15,7 @@ interface LabelPlacementOpts {
   /** Unit perpendicular direction away from the wall. */
   perpX: number;
   perpY: number;
-  /** +1 or -1 — preferred side. */
+  /** +1 or -1 -- preferred side. */
   preferredSide: number;
   /** World-space label dimensions. */
   labelWidth: number;
@@ -70,7 +70,7 @@ export function findLabelPlacement(opts: LabelPlacementOpts): PlacementResult {
   const posX = anchorX + perpX * preferredSide * off;
   const posY = anchorY + perpY * preferredSide * off;
 
-  // No overlap → keep natural position
+  // No overlap -> keep natural position
   if (!hasOverlap(posX, posY, labelWidth, labelHeight, existingBounds)) {
     return { x: posX, y: posY, draw: true };
   }
@@ -91,6 +91,6 @@ export function findLabelPlacement(opts: LabelPlacementOpts): PlacementResult {
     }
   }
 
-  // Give up — draw at natural position anyway
+  // Give up -- draw at natural position anyway
   return { x: posX, y: posY, draw: true };
 }

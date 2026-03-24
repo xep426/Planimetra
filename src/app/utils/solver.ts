@@ -1,5 +1,5 @@
 // Loop detection, BFS chain finding, and closed-loop correction solver
-// Pure functions — no React dependency
+// Pure functions -- no React dependency
 
 import type { Node, Wall } from '../types';
 

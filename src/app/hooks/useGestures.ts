@@ -87,12 +87,12 @@ export interface UseGesturesParams {
 // Constants
 // ---------------------------------------------------------------------------
 
-const DRAG_THRESHOLD = 8; // px – distinguishes tap from drag (mouse)
-const DRAG_THRESHOLD_TOUCH = 18; // px – larger for finger imprecision on touch screens
+const DRAG_THRESHOLD = 8; // px - distinguishes tap from drag (mouse)
+const DRAG_THRESHOLD_TOUCH = 18; // px - larger for finger imprecision on touch screens
 const NODE_HIT_RADIUS = 18; // px
-const NODE_HIT_RADIUS_TOUCH = NODE_HIT_RADIUS + 10; // px – more forgiving for finger imprecision
-const CLOSE_LOOP_RADIUS_TOUCH = NODE_HIT_RADIUS + 16; // px – extra forgiveness to hit the opposite endpoint
-const CLOSE_LOOP_SNAP_PX_TOUCH = 48; // px – prefer endpoint when finger is close in screen space
+const NODE_HIT_RADIUS_TOUCH = NODE_HIT_RADIUS + 10; // px - more forgiving for finger imprecision
+const CLOSE_LOOP_RADIUS_TOUCH = NODE_HIT_RADIUS + 16; // px - extra forgiveness to hit the opposite endpoint
+const CLOSE_LOOP_SNAP_PX_TOUCH = 48; // px - prefer endpoint when finger is close in screen space
 const CLOSE_LOOP_SNAP_PX_MOUSE = 24; // px
 
 // Module-level mutable store for the last preview direction during wall drag.
@@ -266,7 +266,7 @@ export function useGestures(p: UseGesturesParams) {
   };
 
   // ---------------------------------------------------------------------------
-  // processTap — called on a quick tap (no drag)
+  // processTap -- called on a quick tap (no drag)
   // ---------------------------------------------------------------------------
 
   const processTap = (sx: number, sy: number) => {
@@ -882,7 +882,7 @@ export function useGestures(p: UseGesturesParams) {
       return;
     }
 
-    // Single touch end (pan) — detect tap
+    // Single touch end (pan) -- detect tap
     if (touchesRef.current.length === 1 && remaining.length === 0 && !pinchRef.current) {
       const lastTouch = touchesRef.current[0];
       if (dragStartScreenRef.current) {

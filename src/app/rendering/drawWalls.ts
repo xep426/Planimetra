@@ -11,7 +11,7 @@ export function drawWalls(ctx: CanvasRenderingContext2D, dc: DrawContext) {
 
   // --- Compute CW loop exterior perpendiculars for outer wall preview ---
   const wallExteriorPerp = new Map<string, {perpX: number, perpY: number}>();
-  // Mitered outer wall endpoints: wall.id → { ax, ay, bx, by }
+  // Mitered outer wall endpoints: wall.id -> { ax, ay, bx, by }
   const wallMiteredOuter = new Map<string, {ax: number, ay: number, bx: number, by: number}>();
 
   if (dc.loopClosed && walls.length >= 3) {
@@ -81,7 +81,7 @@ export function drawWalls(ctx: CanvasRenderingContext2D, dc: DrawContext) {
         });
       });
 
-      // Line-line intersection (infinite lines through p1→p2 and p3→p4)
+      // Line-line intersection (infinite lines through p1->p2 and p3->p4)
       const intersectLines = (
         p1x: number, p1y: number, p2x: number, p2y: number,
         p3x: number, p3y: number, p4x: number, p4y: number

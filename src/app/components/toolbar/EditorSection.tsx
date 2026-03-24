@@ -31,7 +31,7 @@ interface EditorSectionProps {
   setSelectedPassageId: (id: string | null) => void;
   setSelectedColumnId: (id: string | null) => void;
   setValidationError: (error: string | null) => void;
-  // For add flows — triggers existing modal dialogs
+  // For add flows -- triggers existing modal dialogs
   onAddOrEditWindow: () => void;
   onAddOrEditDoor: () => void;
   onAddOrEditPassage: () => void;
@@ -67,7 +67,7 @@ function moveNodeBAlongWall(nodes: Node[], wall: Wall, newLengthM: number): Node
   );
 }
 
-// ─── Wall Editor ───────────────────────────────────────────────────
+// --- Wall Editor ---------------------------------------------------
 function WallEditor({ wall, nodes, walls, nodeConstraints, saveHistory, setValidationError, onDeleteWall, canDeleteWall, deleteDisabledReason }: {
   wall: Wall; nodes: Node[]; walls: Wall[];
   nodeConstraints: Set<string>;
@@ -171,7 +171,7 @@ function WallEditor({ wall, nodes, walls, nodeConstraints, saveHistory, setValid
   );
 }
 
-// ─── Window Editor ─────────────────────────────────────────────────
+// --- Window Editor -------------------------------------------------
 function WindowEditor({ win, wall, nodes, walls, windows, labels, interiorSign, saveHistory, onDone }: {
   win: WindowObj; wall: Wall; nodes: Node[]; walls: Wall[]; windows: WindowObj[];
   labels: { nodeALabel: 'CW' | 'CCW'; nodeBLabel: 'CW' | 'CCW' };
@@ -268,7 +268,7 @@ function WindowEditor({ win, wall, nodes, walls, windows, labels, interiorSign, 
   );
 }
 
-// ─── Door Editor ───────────────────────────────────────────────────
+// --- Door Editor ---------------------------------------------------
 function DoorEditor({ door, wall, nodes, walls, windows, doors, labels, interiorSign, saveHistory, onDone }: {
   door: DoorObj; wall: Wall; nodes: Node[]; walls: Wall[]; windows: WindowObj[]; doors: DoorObj[];
   labels: { nodeALabel: 'CW' | 'CCW'; nodeBLabel: 'CW' | 'CCW' };
@@ -346,7 +346,7 @@ function DoorEditor({ door, wall, nodes, walls, windows, doors, labels, interior
   );
 }
 
-// ── Passage Editor ────────────────────────────────────────────────
+// -- Passage Editor ------------------------------------------------
 function PassageEditor({ passage, wall, nodes, walls, windows, doors, passages, labels, interiorSign, saveHistory, onDone }: {
   passage: PassageObj; wall: Wall; nodes: Node[]; walls: Wall[]; windows: WindowObj[]; doors: DoorObj[]; passages: PassageObj[];
   labels: { nodeALabel: 'CW' | 'CCW'; nodeBLabel: 'CW' | 'CCW' };
@@ -402,7 +402,7 @@ function PassageEditor({ passage, wall, nodes, walls, windows, doors, passages, 
   );
 }
 
-// ─── Column Editor ─────────────────────────────────────────────────
+// --- Column Editor -------------------------------------------------
 function ColumnEditor({ col, wall, nodes, walls, windows, doors, passages, columns, labels, interiorSign, saveHistory, onDone, onStartColumnJoin, canMerge }: {
   col: ColumnObj; wall: Wall; nodes: Node[]; walls: Wall[]; windows: WindowObj[]; doors: DoorObj[]; passages: PassageObj[]; columns: ColumnObj[];
   labels: { nodeALabel: 'CW' | 'CCW'; nodeBLabel: 'CW' | 'CCW' };
@@ -458,7 +458,7 @@ function ColumnEditor({ col, wall, nodes, walls, windows, doors, passages, colum
     <div className="space-y-2.5">
       {isMerged && (
         <div className="p-2 bg-yellow-900/30 border border-yellow-600/50 rounded">
-          <p className="text-yellow-400 text-[10px]">Merged column — dimensions locked</p>
+          <p className="text-yellow-400 text-[10px]">Merged column \u2014 dimensions locked</p>
         </div>
       )}
       <div className="grid grid-cols-2 gap-2">
@@ -512,7 +512,7 @@ function ColumnEditor({ col, wall, nodes, walls, windows, doors, passages, colum
   );
 }
 
-// ─── Main EditorSection ────────────────────────────────────────────
+// --- Main EditorSection --------------------------------------------
 export function EditorSection(props: EditorSectionProps) {
   const {
     selectedTool, nodes, walls, windows, doors, passages, columns,
@@ -536,7 +536,7 @@ export function EditorSection(props: EditorSectionProps) {
     catch { return { nodeALabel: 'CW' as const, nodeBLabel: 'CCW' as const }; }
   };
 
-  // ── Wall mode ──
+  // -- Wall mode --
   if (selectedTool === 'wall') {
     if (!selectedWall) return <p className="text-gray-500 text-xs italic">Select a wall to edit</p>;
     return (
@@ -547,7 +547,7 @@ export function EditorSection(props: EditorSectionProps) {
     );
   }
 
-  // ── Window mode ──
+  // -- Window mode --
   if (selectedTool === 'window') {
     const selectedWindow = selectedWindowId ? windows.find(w => w.id === selectedWindowId) ?? null : null;
     if (selectedWindow) {
@@ -577,7 +577,7 @@ export function EditorSection(props: EditorSectionProps) {
     return <p className="text-gray-500 text-xs italic">Select a wall or window</p>;
   }
 
-  // ── Door mode ──
+  // -- Door mode --
   if (selectedTool === 'door') {
     const selectedDoor = selectedDoorId ? doors.find(d => d.id === selectedDoorId) ?? null : null;
     if (selectedDoor) {
@@ -607,7 +607,7 @@ export function EditorSection(props: EditorSectionProps) {
     return <p className="text-gray-500 text-xs italic">Select a wall or door</p>;
   }
 
-  // ── Passage mode ──
+  // -- Passage mode --
   if (selectedTool === 'passage') {
     const selectedPassage = selectedPassageId ? passages.find(p => p.id === selectedPassageId) ?? null : null;
     if (selectedPassage) {
@@ -637,7 +637,7 @@ export function EditorSection(props: EditorSectionProps) {
     return <p className="text-gray-500 text-xs italic">Select a wall or passage</p>;
   }
 
-  // ── Column mode ──
+  // -- Column mode --
   if (selectedTool === 'column') {
     if (columnJoinMode) {
       return (

@@ -7,7 +7,7 @@ import type {
 import type { FloorPlanAction } from './useFloorPlanReducer';
 
 // ---------------------------------------------------------------------------
-// Params — what Canvas2D needs to hand in
+// Params -- what Canvas2D needs to hand in
 // ---------------------------------------------------------------------------
 
 interface UseProjectManagerParams {

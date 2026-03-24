@@ -77,7 +77,7 @@ export function AppMenu({
 
   return (
     <>
-      {/* ===== TOP-RIGHT: Mobile — burger menu ===== */}
+      {/* ===== TOP-RIGHT: Mobile -- burger menu ===== */}
       <button onClick={onToggleMenu}
         className="md:hidden fixed top-4 right-4 z-50 h-10 w-10 flex items-center justify-center" title="Menu">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.85)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -108,7 +108,7 @@ export function AppMenu({
             {/* Scrollable content */}
             <div className="flex-1 overflow-y-auto px-4 py-3 space-y-4 flex flex-col">
 
-              {/* ═══ PROJECT SECTION ═══ */}
+              {/* === PROJECT SECTION === */}
               <div>
                 <span className="text-[10px] text-gray-500 uppercase tracking-wider">Project</span>
                 {/* Project name */}
@@ -256,9 +256,9 @@ export function AppMenu({
               {/* Divider */}
               <div className="border-t border-gray-700" />
 
-              {/* ═══ ACTIONS SECTION ═══ */}
+              {/* === ACTIONS SECTION === */}
               <div className="space-y-2 mt-auto">
-                {/* Undo / Redo — hidden on mobile, shown on desktop (mobile uses ActionBar) */}
+                {/* Undo / Redo -- hidden on mobile, shown on desktop (mobile uses ActionBar) */}
                 <div className="hidden md:block space-y-2">
                   <button onClick={() => { onUndo(); }} disabled={historyIndex <= 0}
                     className={`w-full px-4 py-3 rounded-lg flex items-center gap-3 ${historyIndex <= 0 ? 'bg-gray-800 text-gray-500 cursor-not-allowed' : 'bg-gray-800 text-white hover:bg-gray-700'}`}>

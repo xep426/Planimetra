@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-// Canvas2D — orchestration shell for 2D floor plan sketch
+// Canvas2D -- orchestration shell for 2D floor plan sketch
 import { exportToDXF as dxfExport } from '../utils/dxfExport';
 import type {
   Node, Wall, WindowObj, DoorObj,
@@ -288,7 +288,7 @@ export function Canvas2D() {
         !prev.columns.some(p => p.id === c.id && p.mergedShapes && p.mergedShapes.length > 0));
       return hasMergedNew ? 'Merge Columns' : 'Delete Column';
     }
-    // Same counts — check for edits
+    // Same counts -- check for edits
     const wallsChanged = curr.walls.some((w, i) => {
       const p = prev.walls[i]; return !p || w.length !== p.length || w.thickness !== p.thickness || w.type !== p.type;
     });
@@ -383,7 +383,7 @@ export function Canvas2D() {
 
   const toggleNodeConstraint = (nodeId: string) => {
     const isFree = nodeConstraints.has(nodeId);
-    const msg = isFree ? 'Corner Type: 90°' : 'Corner Type: Unconstrained';
+    const msg = isFree ? 'Corner Type: 90\u00B0' : 'Corner Type: Unconstrained';
     const now = Date.now();
     const last = lastCornerToastRef.current;
     if (!(last.msg === msg && now - last.ts < 800)) {
@@ -543,7 +543,7 @@ export function Canvas2D() {
     if (!solvedNodes) {
       const totalM = (chain.wallLengthsCm.reduce((a, b) => a + b, 0) / 100).toFixed(3);
       setValidationError(
-        `Impossible geometry — the closing wall must be shorter than the total of all other walls (${totalM} m).`
+        `Impossible geometry -- the closing wall must be shorter than the total of all other walls (${totalM} m).`
       );
       return;
     }
@@ -779,7 +779,7 @@ export function Canvas2D() {
           <AlertDialogHeader>
             <AlertDialogTitle>Start a new project?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will overwrite your current project. Save it first if you don’t want to lose any data.
+              This will overwrite your current project. Save it first if you don't want to lose any data.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

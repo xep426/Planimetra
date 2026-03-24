@@ -10,12 +10,12 @@ Wall 3: thickness = 10cm, nodeA = n-1772637957146-s, nodeB = n-1772637953965-s c
 === Outer Vertices Debug === code_components_preview_iframe-7e022e10d2e5050f.min.js.br:28:9473
 Outer vertex 0: (0.300000m, -0.424261m) code_components_preview_iframe-7e022e10d2e5050f.min.js.br:28:9473
 Outer vertex 1: (0.300000m, -4.787829m) code_components_preview_iframe-7e022e10d2e5050f.min.js.br:28:9473
-  → Distance from vertex 0: 4.363568m code_components_preview_iframe-7e022e10d2e5050f.min.js.br:28:9473
+  -> Distance from vertex 0: 4.363568m code_components_preview_iframe-7e022e10d2e5050f.min.js.br:28:9473
 Outer vertex 2: (2.728434m, -3.929268m) code_components_preview_iframe-7e022e10d2e5050f.min.js.br:28:9473
-  → Distance from vertex 1: 2.575737m code_components_preview_iframe-7e022e10d2e5050f.min.js.br:28:9473
+  -> Distance from vertex 1: 2.575737m code_components_preview_iframe-7e022e10d2e5050f.min.js.br:28:9473
 Outer vertex 3: (2.728434m, -1.282822m) code_components_preview_iframe-7e022e10d2e5050f.min.js.br:28:9473
-  → Distance from vertex 2: 2.646446m code_components_preview_iframe-7e022e10d2e5050f.min.js.br:28:9473
-  → Distance from vertex 3 to vertex 0: 2.575737m code_components_preview_iframe-7e022e10d2e5050f.min.js.br:28:9473
+  -> Distance from vertex 2: 2.646446m code_components_preview_iframe-7e022e10d2e5050f.min.js.br:28:9473
+  -> Distance from vertex 3 to vertex 0: 2.575737m code_components_preview_iframe-7e022e10d2e5050f.min.js.br:28:9473
 === DXF FILE CONTENT (first 500 chars) === code_components_preview_iframe-7e022e10d2e5050f.min.js.br:28:9473
 0
 SECTION

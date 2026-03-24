@@ -1,5 +1,5 @@
 // Pure geometry and coordinate helper functions
-// No React dependency — all functions are stateless
+// No React dependency -- all functions are stateless
 
 import type { Transform } from '../types';
 
@@ -78,7 +78,7 @@ export function computePolygonAreaAndCentroid(
   const n = points.length;
   if (n < 3) return null;
 
-  let signedArea2 = 0; // 2 × signed area
+  let signedArea2 = 0; // 2 x signed area
   let cx = 0;
   let cy = 0;
 

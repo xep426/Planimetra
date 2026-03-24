@@ -1,5 +1,5 @@
 // Hit-testing functions for finding objects at world coordinates
-// Pure functions — take data as arguments, no React dependency
+// Pure functions -- take data as arguments, no React dependency
 
 import type { Node, Wall, WindowObj, DoorObj, PassageObj, ColumnObj, LabelBounds } from '../types';
 

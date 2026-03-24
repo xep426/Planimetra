@@ -279,7 +279,7 @@ export function floorPlanReducer(state: FloorPlanState, action: FloorPlanAction)
 }
 
 // ---------------------------------------------------------------------------
-// Hook — wraps useReducer with convenience setter functions
+// Hook -- wraps useReducer with convenience setter functions
 // ---------------------------------------------------------------------------
 
 /** Helper type: simple value setter */

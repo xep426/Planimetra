@@ -13,7 +13,7 @@ type DxfPassage = Pick<PassageObj, 'id' | 'wallId' | 'position' | 'width' | 'off
 type DxfColumn = Pick<ColumnObj, 'id' | 'wallId' | 'position' | 'width' | 'depth' | 'inset' | 'mergedShapes'>;
 
 // ---------------------------------------------------------------------------
-// Handle allocator — every DXF object (table, table entry, block, entity)
+// Handle allocator -- every DXF object (table, table entry, block, entity)
 // needs a unique hex handle (group code 5).
 // ---------------------------------------------------------------------------
 class HandleAllocator {
@@ -88,7 +88,7 @@ export function exportToDXF(
   dxf += '9\n$MEASUREMENT\n70\n1\n';
   dxf += '9\n$LUNITS\n70\n2\n';
   dxf += '9\n$LUPREC\n70\n6\n';
-  // $HANDSEED — placeholder, we patch it at the very end
+  // $HANDSEED -- placeholder, we patch it at the very end
   const HANDSEED_MARKER = '%%HANDSEED%%';
   dxf += `9\n$HANDSEED\n5\n${HANDSEED_MARKER}\n`;
   dxf += '0\nENDSEC\n';
@@ -211,7 +211,7 @@ export function exportToDXF(
   dxf += '0\nENDSEC\n';
 
   // =========================================================================
-  // BLOCKS section — *Model_Space and *Paper_Space (required, even if empty)
+  // BLOCKS section -- *Model_Space and *Paper_Space (required, even if empty)
   // =========================================================================
   dxf += '0\nSECTION\n2\nBLOCKS\n';
 
@@ -286,7 +286,7 @@ export function exportToDXF(
     dxf += '0\nARC\n';
     dxf += `5\n${H.h()}\n330\n${modelOwner}\n`;
     dxf += `100\nAcDbEntity\n8\n${layer}\n`;
-    // ARC inherits from CIRCLE — needs AcDbCircle for center + radius
+    // ARC inherits from CIRCLE -- needs AcDbCircle for center + radius
     dxf += '100\nAcDbCircle\n';
     dxf += `10\n${center.x.toFixed(6)}\n20\n${center.y.toFixed(6)}\n30\n0.0\n`;
     dxf += `40\n${radius.toFixed(6)}\n`;
@@ -334,14 +334,14 @@ export function exportToDXF(
   }
   const isCW = signedArea < 0;
 
-  // wallId → +1 if A→B perp points interior, -1 if exterior
+  // wallId -> +1 if A->B perp points interior, -1 if exterior
   const wallInteriorSign = new Map<string, number>();
   orderedTraversal.forEach(({ wall, fromId }) => {
     const traversalFollowsAB = fromId === wall.nodeA;
     wallInteriorSign.set(wall.id, isCW === traversalFollowsAB ? 1 : -1);
   });
 
-  // wallId → exterior perpendicular (canvas space, unit length)
+  // wallId -> exterior perpendicular (canvas space, unit length)
   const wallExteriorPerp = new Map<string, { perpX: number; perpY: number }>();
   orderedTraversal.forEach(({ wall, fromId, toId }) => {
     const nFrom = nodes.find(n => n.id === fromId);
@@ -420,7 +420,7 @@ export function exportToDXF(
   }
 
   // =========================================================================
-  // WALLS — 2 LINEs per wall (inner face + mitered outer face)
+  // WALLS -- 2 LINEs per wall (inner face + mitered outer face)
   // =========================================================================
   walls.forEach(wall => {
     const nA = nodes.find(n => n.id === wall.nodeA);
@@ -543,7 +543,7 @@ export function exportToDXF(
   });
 
   // =========================================================================
-  // WINDOWS — frame rectangle + 2 glass lines + swing arc for openable
+  // WINDOWS -- frame rectangle + 2 glass lines + swing arc for openable
   // =========================================================================
   windows.forEach(win => {
     const wall = walls.find(w => w.id === win.wallId);
@@ -574,7 +574,7 @@ export function exportToDXF(
     const halfW = widthMm / 2;
     const depth = 100; // 10cm = 100mm frame depth
 
-    // Frame rectangle — flush on inner wall face
+    // Frame rectangle -- flush on inner wall face
     writePolyline(
       [
         toWorld(-halfW, 0),
@@ -604,11 +604,11 @@ export function exportToDXF(
         : rawHinge === 'left' ? 'right' : rawHinge === 'right' ? 'left' : 'center';
 
       if (win.panelCount === 'single') {
-        // Single pane — one hinge, full-width swing
+        // Single pane -- one hinge, full-width swing
         const hingeLocalX = hinge === 'left' ? -halfW : halfW;
         const hp = toWorld(hingeLocalX, 0);
 
-        // Leaf line at 90° open position
+        // Leaf line at 90 deg open position
         const openTip = toWorld(hingeLocalX, openDir * widthMm);
         writeLine(hp, openTip, 'WINDOWS');
 
@@ -626,7 +626,7 @@ export function exportToDXF(
 
         writeArc(hp, widthMm, startA, endA, 'WINDOWS');
       } else {
-        // Double pane — two half-width swings from outer edges
+        // Double pane -- two half-width swings from outer edges
         // Left pane: hinge at -halfW, swings half-width
         const hpL = toWorld(-halfW, 0);
         const openTipL = toWorld(-halfW, openDir * halfW);
@@ -661,7 +661,7 @@ export function exportToDXF(
   });
 
   // =========================================================================
-  // DOORS — frame rect + leaf line + swing arc  (mirrors canvas drawDoors)
+  // DOORS -- frame rect + leaf line + swing arc  (mirrors canvas drawDoors)
   // =========================================================================
   doors.forEach(door => {
     const wall = walls.find(w => w.id === door.wallId);

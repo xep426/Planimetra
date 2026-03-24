@@ -125,7 +125,7 @@ export function drawColumns(ctx: CanvasRenderingContext2D, dc: DrawContext) {
 
     // Draw label
     ctx.font = '9px monospace';
-    const txt = `COL ${column.width.toFixed(3)}×${column.depth.toFixed(3)}m`;
+    const txt = `COL ${column.width.toFixed(3)}\u00D7${column.depth.toFixed(3)}m`;
     const tw = ctx.measureText(txt).width;
     const rw = (tw + 8) / transform.scale;
     const rh = 14 / transform.scale;

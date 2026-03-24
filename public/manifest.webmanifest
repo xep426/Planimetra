@@ -1,7 +1,7 @@
 {
   "name": "Planimetra",
   "short_name": "Planimetra",
-  "description": "Measure. Sketch. Export. — 2D floor plans with wall, door, window, and column placement",
+  "description": "Measure. Sketch. Export. \u2014 2D floor plans with wall, door, window, and column placement",
   "start_url": "/",
   "display": "standalone",
   "orientation": "portrait",

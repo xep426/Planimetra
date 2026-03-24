@@ -2,7 +2,7 @@ import { useState } from 'react';
 import type { RoomData, Node, Wall, WindowObj, DoorObj, PassageObj, ColumnObj, LayerType } from '../../types';
 import { EditorSection } from './EditorSection';
 
-// ── Compute room area in m² using Shoelace on ordered wall-loop nodes ────────
+// -- Compute room area in m^2 using Shoelace on ordered wall-loop nodes --------
 
 function computeRoomAreaM2(nodes: Node[], walls: Wall[]): number | null {
   if (walls.length < 3 || nodes.length < 3) return null;
@@ -41,7 +41,7 @@ function computeRoomAreaM2(nodes: Node[], walls: Wall[]): number | null {
   // Check it loops back
   if (current !== startId) return null;
 
-  // Shoelace formula (coords are in cm → result in cm² → convert to m²)
+  // Shoelace formula (coords are in cm -> result in cm^2 -> convert to m^2)
   let area = 0;
   const n = ordered.length;
   for (let i = 0; i < n; i++) {
@@ -49,7 +49,7 @@ function computeRoomAreaM2(nodes: Node[], walls: Wall[]): number | null {
     area += ordered[i].x * ordered[j].y;
     area -= ordered[j].x * ordered[i].y;
   }
-  return Math.abs(area) / 2 / 10000; // cm² → m²
+  return Math.abs(area) / 2 / 10000; // cm^2 -> m^2
 }
 
 // Collapsible Section wrapper 
@@ -173,7 +173,7 @@ export function RightPanel(props: RightPanelProps) {
     onDeleteWall, canDeleteWall, deleteWallDisabledReason,
   } = props;
 
-  // ── Project name editing ──
+  // -- Project name editing --
   const [editingProjectName, setEditingProjectName] = useState(false);
   const [projectNameDraft, setProjectNameDraft] = useState('');
 
@@ -187,7 +187,7 @@ export function RightPanel(props: RightPanelProps) {
     setEditingProjectName(false);
   };
 
-  // ── Room CRUD ──
+  // -- Room CRUD --
   const [showNewRoomPrompt, setShowNewRoomPrompt] = useState(false);
   const [newRoomName, setNewRoomName] = useState('');
   const [editingRoomId, setEditingRoomId] = useState<string | null>(null);
@@ -231,14 +231,14 @@ export function RightPanel(props: RightPanelProps) {
         </svg>
       </button>
 
-      {/* Panel — desktop only, slides in/out */}
+      {/* Panel -- desktop only, slides in/out */}
       <div
         className={`hidden md:flex fixed top-0 bottom-0 w-72 bg-gray-900/95 backdrop-blur border-l border-gray-700 z-30 flex-col overflow-hidden
           transition-transform duration-300 ease-in-out ${panelOpen ? 'right-0 translate-x-0' : 'right-0 translate-x-full'}`}
       >
         {/* Scrollable content area */}
         <div className="flex-1 overflow-y-auto flex flex-col">
-          {/* ═══ 1. PROJECT SECTION ═══ */}
+          {/* === 1. PROJECT SECTION === */}
           <CollapsibleSection title="Project" defaultOpen={true}>
             {/* Project name */}
             <div className="mb-3">
@@ -384,7 +384,7 @@ export function RightPanel(props: RightPanelProps) {
             </div>
           </CollapsibleSection>
 
-          {/* ═══ 2. OBJECT EDITOR SECTION ═══ */}
+          {/* === 2. OBJECT EDITOR SECTION === */}
           <CollapsibleSection title="Object Editor" defaultOpen={true} borderBottom={false}>
             <EditorSection
               selectedTool={selectedTool}
@@ -422,7 +422,7 @@ export function RightPanel(props: RightPanelProps) {
               deleteWallDisabledReason={deleteWallDisabledReason}
             />
           </CollapsibleSection>
-          {/* ═══ 3. ACTIONS SECTION ═══ */}
+          {/* === 3. ACTIONS SECTION === */}
           <div className="px-3 py-3 border-t border-gray-700 space-y-1.5 mt-auto">
             {/* Undo / Redo */}
             <div className="space-y-1.5 pb-1.5 border-b border-gray-800">

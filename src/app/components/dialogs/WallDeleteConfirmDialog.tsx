@@ -22,7 +22,7 @@ export function WallDeleteConfirmDialog({
         {message && (
           <div className="bg-yellow-900/40 border border-yellow-600/50 rounded px-3 py-2 mb-4">
             <p className="text-yellow-300 text-sm flex items-start gap-2">
-              <span className="shrink-0 mt-0.5">⚠️</span>
+              <span className="shrink-0 mt-0.5">{'\u26A0\uFE0F'}</span>
               <span>{message}</span>
             </p>
           </div>

@@ -1,5 +1,5 @@
-// Wall geometry helpers — angle calculations, direction labels, winding order
-// Pure functions — no React dependency
+// Wall geometry helpers -- angle calculations, direction labels, winding order
+// Pure functions -- no React dependency
 
 import type { Node, Wall } from '../types';
 import { snapAngle45 } from './geometry';

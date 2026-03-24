@@ -66,7 +66,7 @@ export function ProjectPanel({
 
   return (
     <>
-      {/* Toggle button — desktop only */}
+      {/* Toggle button -- desktop only */}
       <button
         onClick={onTogglePanel}
         className="hidden md:flex fixed top-4 right-4 z-40 w-10 h-10 rounded-lg shadow-lg bg-gray-800 border border-gray-700 items-center justify-center hover:bg-gray-700 transition-colors"
@@ -81,7 +81,7 @@ export function ProjectPanel({
         </svg>
       </button>
 
-      {/* Panel — desktop only */}
+      {/* Panel -- desktop only */}
       {panelOpen && (
         <div className="hidden md:flex fixed top-0 right-0 bottom-0 w-72 bg-gray-900/95 backdrop-blur border-l border-gray-700 z-30 flex-col overflow-hidden">
           {/* Header */}

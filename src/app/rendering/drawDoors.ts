@@ -75,7 +75,7 @@ export function drawDoors(ctx: CanvasRenderingContext2D, dc: DrawContext) {
 
     // Draw label on the SAME side as the swing arc
     ctx.font = '9px monospace';
-    const txt = `Door ${door.width.toFixed(2)}×${door.height.toFixed(2)} m`;
+    const txt = `Door ${door.width.toFixed(2)}\u00D7${door.height.toFixed(2)} m`;
     const tw = ctx.measureText(txt).width;
     const rw = (tw + 8) / transform.scale;
     const rh = 14 / transform.scale;

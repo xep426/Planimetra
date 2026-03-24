@@ -90,7 +90,7 @@ export function WallEditDialog({
           </div>
         </div>
         
-        {/* Action buttons — visually separated from form */}
+        {/* Action buttons -- visually separated from form */}
         <div className="border-t border-gray-600/50 mt-6 pt-4 space-y-3">
           <div className="flex gap-2">
             <button 

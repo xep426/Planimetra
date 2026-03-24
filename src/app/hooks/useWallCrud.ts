@@ -63,11 +63,11 @@ export function useWallCrud({
   const [wallEditThickness, setWallEditThickness] = useState(20);
   const [wallEditLength, setWallEditLength] = useState('');
 
-  // ── Delete confirmation state ──
+  // -- Delete confirmation state --
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteConfirmMessage, setDeleteConfirmMessage] = useState('');
 
-  // ── Derived: can the selected wall be deleted? ──
+  // -- Derived: can the selected wall be deleted? --
   const canDeleteSelectedWall = useMemo(() => {
     if (!selectedWallId) return false;
     const wall = walls.find(w => w.id === selectedWallId);
@@ -78,7 +78,7 @@ export function useWallCrud({
     return isEdgeWall(wall, walls);
   }, [selectedWallId, walls]);
 
-  // ── Reason string when deletion is disabled ──
+  // -- Reason string when deletion is disabled --
   const deleteWallDisabledReason = useMemo((): string | null => {
     if (!selectedWallId) return 'Select a wall first';
     const wall = walls.find(w => w.id === selectedWallId);
@@ -88,7 +88,7 @@ export function useWallCrud({
     return 'Only end-of-chain walls can be deleted';
   }, [selectedWallId, walls, canDeleteSelectedWall]);
 
-  // ── Edit ──
+  // -- Edit --
   const handleEditWallClick = () => {
     if (!selectedWallId) return;
     const wall = walls.find(w => w.id === selectedWallId);
@@ -132,7 +132,7 @@ export function useWallCrud({
           if (solvedNodes) {
             updatedNodes = solvedNodes;
           } else {
-            setValidationError('Cannot re-close the loop with that wall length — geometry is impossible.');
+            setValidationError('Cannot re-close the loop with that wall length \u2014 geometry is impossible.');
             return;
           }
         } else {
@@ -148,9 +148,9 @@ export function useWallCrud({
     setValidationError(null);
   };
 
-  // ── Delete ──
+  // -- Delete --
 
-  /** Initiate wall deletion — shows confirmation if cascade objects exist */
+  /** Initiate wall deletion -- shows confirmation if cascade objects exist */
   const handleDeleteWallClick = () => {
     if (!selectedWallId || !canDeleteSelectedWall) return;
 

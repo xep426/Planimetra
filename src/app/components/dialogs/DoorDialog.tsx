@@ -131,7 +131,7 @@ export function DoorDialog({
 
         {validationError && <p className="text-red-400 text-sm mb-4">{validationError}</p>}
         
-        {/* Action buttons — visually separated from form */}
+        {/* Action buttons -- visually separated from form */}
         <div className="border-t border-gray-600/50 mt-6 pt-4 space-y-3">
           <div className="flex gap-2">
             <button onClick={onSubmit} className="flex-1 px-4 py-2.5 bg-cyan-500 text-white rounded hover:bg-cyan-600">
