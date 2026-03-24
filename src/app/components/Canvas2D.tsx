@@ -57,11 +57,11 @@ export function Canvas2D() {
 
   const {
     state, dispatch,
-    setTransform, setNodes, setWalls, setWindows, setDoors, setPassages, setColumns,
+    setTransform,
     setPreviewLine, setShowLengthPrompt, setPendingConnection,
     setLengthInput, setSelectedWallId, setSelectedTool,
     setShowCloseLoopPrompt, setCloseLoopLength, setOpenLoopEndpoints,
-    setValidationError, setUnconstrainedNodes,
+    setValidationError,
     setMenuOpen, setLayerOpen,
     setSelectedWindowId, setSelectedDoorId, setSelectedPassageId, setSelectedColumnId,
     setColumnJoinMode, setColumnsToJoin,
@@ -465,12 +465,27 @@ export function Canvas2D() {
     };
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Draw grid without rotation — lines stay axis-aligned on screen.
+    // Compute the screen-space offset of the world origin using the full rotated
+    // transform so the grid still tracks panning correctly.
+    ctx.save();
+    ctx.translate(canvas.width / 2, canvas.height / 2);
+    ctx.scale(transform.scale, transform.scale);
+    const cos = Math.cos(transform.rotation);
+    const sin = Math.sin(transform.rotation);
+    ctx.translate(
+      transform.x * cos - transform.y * sin,
+      transform.x * sin + transform.y * cos,
+    );
+    drawGrid(ctx, canvas.width, canvas.height, transform);
+    ctx.restore();
+
     ctx.save();
     ctx.translate(canvas.width / 2, canvas.height / 2);
     ctx.rotate(transform.rotation);
     ctx.scale(transform.scale, transform.scale);
     ctx.translate(transform.x, transform.y);
-    drawGrid(ctx, canvas.width, canvas.height, transform);
     drawWalls(ctx, dc);
     drawWindows(ctx, dc);
     drawDoors(ctx, dc);

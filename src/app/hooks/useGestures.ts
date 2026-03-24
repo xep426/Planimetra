@@ -64,15 +64,15 @@ export interface UseGesturesParams {
   // Utility functions (delegating to extracted utils)
   screenToWorld: (sx: number, sy: number) => { x: number; y: number };
   snapped: (wx: number, wy: number) => { x: number; y: number };
-  findNodeAt: (wx: number, wy: number) => Node | undefined;
+  findNodeAt: (wx: number, wy: number) => Node | null;
   nodeConnections: (id: string) => number;
-  findNearbyNode: (wx: number, wy: number, excludeId: string) => Node | undefined;
-  findWallAt: (wx: number, wy: number) => Wall | undefined;
-  findWindowAt: (wx: number, wy: number) => WindowObj | undefined;
-  findDoorAt: (wx: number, wy: number) => DoorObj | undefined;
-  findPassageAt: (wx: number, wy: number) => PassageObj | undefined;
-  findColumnAt: (wx: number, wy: number) => ColumnObj | undefined;
-  findLabelAt: (wx: number, wy: number) => LabelBounds | undefined;
+  findNearbyNode: (wx: number, wy: number, excludeId: string) => Node | null;
+  findWallAt: (wx: number, wy: number) => Wall | null;
+  findWindowAt: (wx: number, wy: number) => WindowObj | null;
+  findDoorAt: (wx: number, wy: number) => DoorObj | null;
+  findPassageAt: (wx: number, wy: number) => PassageObj | null;
+  findColumnAt: (wx: number, wy: number) => ColumnObj | null;
+  findLabelAt: (wx: number, wy: number) => LabelBounds | null;
   snapDirection: (fx: number, fy: number, tx: number, ty: number, refId?: string) => { directionX: number; directionY: number } | undefined;
   toggleNodeConstraint: (nodeId: string) => void;
 
@@ -334,7 +334,7 @@ export function useGestures(p: UseGesturesParams) {
         n => n.id !== excludeId &&
           p.nodeConnections(n.id) < 2 &&
           Math.hypot(n.x - wx, n.y - wy) < r
-      ) ?? undefined
+      ) ?? null
     );
   };
 
