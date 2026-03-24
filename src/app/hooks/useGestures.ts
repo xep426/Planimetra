@@ -31,7 +31,7 @@ export interface UseGesturesParams {
   loopClosed: boolean;
 
   // Node constraints (set of unconstrained node IDs)
-  nodeConstraints: Set<string>;
+  unconstrainedNodes: Set<string>;
 
   // Open loop endpoints for close-loop detection
   openLoopEndpoints: { nodeA: string; nodeB: string } | null;
@@ -381,7 +381,7 @@ export function useGestures(p: UseGesturesParams) {
     const { x: snx, y: sny } = p.snapped(wx, wy);
 
     // Is the source node unconstrained (free angle)?
-    const isFreeAngle = p.nodeConstraints.has(dragSourceRef.current);
+    const isFreeAngle = p.unconstrainedNodes.has(dragSourceRef.current);
 
     if (nearNode && p.nodeConnections(nearNode.id) < 2) {
       _lastPreviewDir = null; // snapping to node, no direction needed
@@ -529,7 +529,7 @@ export function useGestures(p: UseGesturesParams) {
       p.saveHistory([...p.nodes], [...p.walls, newWall]);
     } else {
       // Drag to empty space: open length prompt
-      const isFreeAngle = p.nodeConstraints.has(sourceId);
+      const isFreeAngle = p.unconstrainedNodes.has(sourceId);
 
       if (isFreeAngle) {
         // Unconstrained: use raw direction, no angle snapping
@@ -818,9 +818,9 @@ export function useGestures(p: UseGesturesParams) {
           isDraggingWallRef.current = true;
         }
         if (isDraggingWallRef.current) {
-        updateWallDrag(t.x, t.y, true);
-        return;
-      }
+          updateWallDrag(t.x, t.y, true);
+          return;
+        }
         return; // Still within threshold, wait
       }
 

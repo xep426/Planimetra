@@ -72,7 +72,8 @@ export function solveClosedLoop(
   wallLengthsCm: number[],  // N-1 existing wall lengths (cm)
   closingLengthCm: number,  // closing wall length (cm)
   unconstrained: Set<string>, // unconstrained node IDs (absorb error first)
-  nodes: Node[]             // current node positions
+  nodes: Node[],            // current node positions
+  sourceNodeId?: string     // optional: exclude this node from correction
 ): Node[] | null {
   const N = chainNodeIds.length; // number of nodes
   if (N < 3) return null;
@@ -99,11 +100,53 @@ export function solveClosedLoop(
     return { x: nd.x, y: nd.y };
   });
   const theta: number[] = [];
-  for (let i = 0; i < N; i++) {
+  // Existing walls along the open chain
+  for (let i = 0; i < N - 1; i++) {
     const from = pos0[i];
-    const to = pos0[(i + 1) % N];
+    const to = pos0[i + 1];
     theta.push(Math.atan2(to.y - from.y, to.x - from.x));
   }
+  // Closing wall angle (initial guess from endpoints)
+  const closeFrom = pos0[N - 1];
+  const closeTo = pos0[0];
+  theta.push(Math.atan2(closeTo.y - closeFrom.y, closeTo.x - closeFrom.x));
+
+  // --- Force constrained existing corners to nearest right angle ---
+  // Only snap interior nodes that already have two existing walls (i = 1..N-2).
+  const TAU = Math.PI * 2;
+  const normAngle = (a: number) => {
+    let r = a % TAU;
+    if (r <= -Math.PI) r += TAU;
+    if (r > Math.PI) r -= TAU;
+    return r;
+  };
+  const angleDiff = (a: number, b: number) => Math.abs(normAngle(a - b));
+  const snapRightAngle = (incoming: number, outgoing: number) => {
+    const candA = incoming + Math.PI / 2;
+    const candB = incoming - Math.PI / 2;
+    return angleDiff(candA, outgoing) <= angleDiff(candB, outgoing) ? candA : candB;
+  };
+  const applyRightAngleConstraints = () => {
+    for (let i = 0; i < N; i++) {
+      const nodeId = chainNodeIds[i];
+      if (sourceNodeId && nodeId === sourceNodeId) continue;
+      if (!unconstrained.has(nodeId)) {
+        const incoming = theta[(i - 1 + N) % N];
+        theta[i] = snapRightAngle(incoming, theta[i]);
+      }
+    }
+  };
+  const updateClosingAngleFromChain = () => {
+    // Recompute closing wall direction from the corrected open chain.
+    let Ex = 0, Ey = 0;
+    for (let i = 0; i < N - 1; i++) {
+      Ex += L[i] * Math.cos(theta[i]);
+      Ey += L[i] * Math.sin(theta[i]);
+    }
+    theta[N - 1] = Math.atan2(-Ey, -Ex);
+  };
+  applyRightAngleConstraints();
+  updateClosingAngleFromChain();
 
   const anchor0 = { x: pos0[0].x, y: pos0[0].y };
 
@@ -189,6 +232,69 @@ export function solveClosedLoop(
       newPos[i].x -= errX * fraction;
       newPos[i].y -= errY * fraction;
     }
+  }
+
+  return nodes.map(nd => {
+    const idx = chainNodeIds.indexOf(nd.id);
+    return idx < 0 ? nd : { ...nd, x: newPos[idx].x, y: newPos[idx].y };
+  });
+}
+
+/**
+ * Debug helper: only snap existing constrained corners along an open chain,
+ * without placing or solving the closing wall.
+ */
+export function snapOpenChainRightAngles(
+  chainNodeIds: string[],
+  wallLengthsCm: number[],
+  unconstrained: Set<string>,
+  nodes: Node[]
+): Node[] | null {
+  const N = chainNodeIds.length;
+  if (N < 3) return null;
+  if (wallLengthsCm.length !== N - 1) return null;
+
+  const pos0 = chainNodeIds.map(id => {
+    const nd = nodes.find(n => n.id === id)!;
+    return { x: nd.x, y: nd.y };
+  });
+
+  const theta: number[] = [];
+  for (let i = 0; i < N - 1; i++) {
+    const from = pos0[i];
+    const to = pos0[i + 1];
+    theta.push(Math.atan2(to.y - from.y, to.x - from.x));
+  }
+
+  const TAU = Math.PI * 2;
+  const normAngle = (a: number) => {
+    let r = a % TAU;
+    if (r <= -Math.PI) r += TAU;
+    if (r > Math.PI) r -= TAU;
+    return r;
+  };
+  const angleDiff = (a: number, b: number) => Math.abs(normAngle(a - b));
+  const snapRightAngle = (incoming: number, outgoing: number) => {
+    const candA = incoming + Math.PI / 2;
+    const candB = incoming - Math.PI / 2;
+    return angleDiff(candA, outgoing) <= angleDiff(candB, outgoing) ? candA : candB;
+  };
+
+  // Only snap interior nodes (existing corners).
+  for (let i = 1; i <= N - 2; i++) {
+    if (!unconstrained.has(chainNodeIds[i])) {
+      const incoming = theta[i - 1];
+      theta[i] = snapRightAngle(incoming, theta[i]);
+    }
+  }
+
+  const newPos: { x: number; y: number }[] = new Array(N);
+  newPos[0] = { ...pos0[0] };
+  for (let i = 1; i < N; i++) {
+    newPos[i] = {
+      x: newPos[i - 1].x + wallLengthsCm[i - 1] * Math.cos(theta[i - 1]),
+      y: newPos[i - 1].y + wallLengthsCm[i - 1] * Math.sin(theta[i - 1]),
+    };
   }
 
   return nodes.map(nd => {
