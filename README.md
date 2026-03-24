@@ -2,18 +2,24 @@
 
 Yet another 2D floor-plan sketcher -- except it's the one I wanted to use, so I built it (and I needed DXF export functionality).
 
+![Planimetra desktop screenshot](public/screenshot_desktop.jpg)
+
+## Live Demo
+
+- https://planimetra.vercel.app/
+
 ## Features
 
-- Interactive 2D canvas for drawing floor plans
+- 2D canvas for drawing floor plans
 - Walls, doors, windows, columns, and passages
-- Precision measurements and geometry tools
-- Advanced editing tools (wall deletion, height editing)
-- Project file management and persistence
-- Responsive design with mobile-friendly UI
-- Undo/redo support
-- Layer management
-- DXF export for CAD compatibility
-- PWA support for offline access
+- Measurements and geometry helpers
+- Wall editing (delete, change length/type/thickness)
+- Project save/load and persistence
+- Mobile-friendly layout
+- Undo/redo
+- Layer switching
+- DXF export
+- PWA offline support
 
 ## Getting Started
 

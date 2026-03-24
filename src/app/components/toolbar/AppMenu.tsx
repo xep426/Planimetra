@@ -254,7 +254,6 @@ export function AppMenu({
               </div>
 
               {/* Divider */}
-              <div className="border-t border-gray-700" />
 
               {/* === ACTIONS SECTION === */}
               <div className="space-y-2 mt-auto">
