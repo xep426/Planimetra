@@ -1,6 +1,8 @@
+import { useEffect, useRef } from 'react';
 import type { LayerType } from '../../types';
 
 interface LayersDropdownProps {
+  guiReady?: boolean;
   selectedTool: LayerType;
   layerOpen: boolean;
   loopClosed: boolean;
@@ -27,12 +29,30 @@ const TOOL_LABELS: Record<LayerType, string> = {
 };
 
 export function LayersDropdown({
+  guiReady = true,
   selectedTool, layerOpen, loopClosed,
   onToolChange, onToggleOpen, onClose,
   adjacent,
 }: LayersDropdownProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!layerOpen) return;
+    const handleOutside = (e: MouseEvent | TouchEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        onClose();
+      }
+    };
+    document.addEventListener('mousedown', handleOutside);
+    document.addEventListener('touchstart', handleOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleOutside);
+      document.removeEventListener('touchstart', handleOutside);
+    };
+  }, [layerOpen, onClose]);
+
   return (
-    <div className="fixed top-4 left-4 z-40 flex items-center gap-2">
+    <div ref={containerRef} className={`fixed top-4 left-4 z-40 flex items-center gap-2 transition-all duration-500 ${guiReady ? 'translate-x-0 opacity-100' : '-translate-x-4 opacity-0'}`}>
       <button
         onClick={onToggleOpen}
         className="h-10 px-4 rounded-xl bg-white/90 backdrop-blur shadow-lg flex items-center gap-2 text-gray-800 hover:bg-white transition-all"
@@ -51,8 +71,6 @@ export function LayersDropdown({
       {adjacent}
 
       {layerOpen && (
-        <>
-          <div className="fixed inset-0 z-30" onClick={onClose} />
           <div className="absolute top-12 left-0 w-48 rounded-xl bg-white/95 backdrop-blur shadow-xl border border-gray-200/60 overflow-hidden z-40">
             <div className="px-3 py-2 border-b border-gray-100">
               <span className="text-[11px] text-gray-400 uppercase tracking-wider">Layers</span>
@@ -82,7 +100,6 @@ export function LayersDropdown({
               );
             })}
           </div>
-        </>
       )}
     </div>
   );

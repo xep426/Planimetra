@@ -135,7 +135,7 @@ export function useProjectManager({
           walls: [], windows: [], doors: [], passages: [], columns: [],
         }],
         historyIndex: room.historyIndex,
-        transform: room.transform,
+        transform: room.walls.length === 0 ? { x: 0, y: 0, scale: 1, rotation: 0 } : room.transform,
         unconstrainedNodes: new Set(room.unconstrainedNodes),
         selectedTool: room.selectedTool as any,
         selectedWallId: null, selectedWindowId: null,

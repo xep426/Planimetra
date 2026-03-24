@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { RoomData } from '../../types';
 
 interface AppMenuProps {
+  guiReady?: boolean;
   menuOpen: boolean;
   loopClosed: boolean;
   historyIndex: number;
@@ -28,6 +29,7 @@ interface AppMenuProps {
 }
 
 export function AppMenu({
+  guiReady = true,
   menuOpen, loopClosed,
   historyIndex, historyLength,
   onToggleMenu, onCloseMenu,
@@ -79,7 +81,7 @@ export function AppMenu({
     <>
       {/* ===== TOP-RIGHT: Mobile -- burger menu ===== */}
       <button onClick={onToggleMenu}
-        className="md:hidden fixed top-4 right-4 z-50 h-10 w-10 flex items-center justify-center" title="Menu">
+        className={`md:hidden fixed top-4 right-4 z-50 h-10 w-10 flex items-center justify-center transition-all duration-500 ${guiReady ? 'translate-x-0 opacity-100' : 'translate-x-4 opacity-0'}`} title="Menu">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.85)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           {menuOpen
             ? <><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></>

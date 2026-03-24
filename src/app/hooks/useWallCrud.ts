@@ -195,7 +195,7 @@ export function useWallCrud({
       nodesInUse.add(w.nodeA);
       nodesInUse.add(w.nodeB);
     });
-    const updatedNodes = nodes.filter(n => nodesInUse.has(n.id));
+    const updatedNodes = nodes.filter(n => nodesInUse.has(n.id) || n.id === 'origin');
 
     // Deselect and save
     setSelectedWallId(null);

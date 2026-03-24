@@ -42,7 +42,7 @@ import {
   useGestures, useFloorPlanReducer, useProjectManager,
 } from '../hooks';
 
-export function Canvas2D() {
+export function Canvas2D({ guiReady = true }: { guiReady?: boolean }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const drawSceneRef = useRef<((ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) => void) | null>(null);
   const labelBoundsRef = useRef<LabelBounds[]>([]);
@@ -249,6 +249,14 @@ export function Canvas2D() {
     const cy = (minY + maxY) / 2;
     setTransform(prev => ({ ...prev, x: -cx, y: -cy }));
   };
+
+  // When there are no walls (only the origin node), always snap back to center
+  useEffect(() => {
+    if (walls.length === 0) {
+      setTransform({ x: 0, y: 0, scale: 1, rotation: 0 });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [walls.length]);
 
   const contentOffscreen = useMemo(() => {
     if (nodes.length === 0) return false;
@@ -643,6 +651,7 @@ export function Canvas2D() {
       />
 
       <ActionBar
+        guiReady={guiReady}
         selectedTool={selectedTool}
         selectedWallId={selectedWallId}
         selectedWindowId={selectedWindowId}
@@ -703,6 +712,7 @@ export function Canvas2D() {
       </button>
 
       <LayersDropdown
+        guiReady={guiReady}
         selectedTool={selectedTool}
         layerOpen={layerOpen}
         loopClosed={isLoopClosed()}
@@ -719,6 +729,7 @@ export function Canvas2D() {
       />
 
       <AppMenu
+        guiReady={guiReady}
         menuOpen={menuOpen}
         loopClosed={isLoopClosed()}
         historyIndex={historyIndex}
@@ -744,6 +755,7 @@ export function Canvas2D() {
       />
 
       <RightPanel
+        guiReady={guiReady}
         panelOpen={panelOpen}
         onTogglePanel={() => setPanelOpen(!panelOpen)}
         projectName={projectName}
