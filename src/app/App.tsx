@@ -24,6 +24,7 @@ function hasExistingData(): boolean {
 export default function App() {
   const [ready, setReady] = useState(hasExistingData);
   const handleReady = useCallback(() => setReady(true), []);
+  const handleNewProject = useCallback(() => setReady(false), []);
 
   useEffect(() => {
     registerPWA();
@@ -32,7 +33,7 @@ export default function App() {
   return (
     <div className="fixed inset-0 overflow-hidden bg-gray-900">
       {!ready && <SplashScreen onReady={handleReady} />}
-      <Canvas2D guiReady={ready} />
+      <Canvas2D guiReady={ready} onNewProject={handleNewProject} />
     </div>
   );
 }

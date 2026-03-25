@@ -220,9 +220,9 @@ export function RightPanel(props: RightPanelProps) {
         onClick={onTogglePanel}
         className={`hidden md:flex fixed top-3 z-40 w-5 h-8 items-center justify-center
           bg-gray-800/80 border border-gray-700 border-r-0 rounded-l
-          hover:bg-gray-700 transition-all duration-500 ease-in-out
+          hover:bg-gray-700 transition-all ease-in-out
           ${panelOpen ? 'right-72' : 'right-0'}
-          ${guiReady ? 'translate-x-0 opacity-100' : 'translate-x-4 opacity-0'}`}
+          ${guiReady ? 'duration-500 translate-x-0 opacity-100' : 'duration-0 translate-x-4 opacity-0'}`}
         title={panelOpen ? 'Hide Panel' : 'Show Panel'}
       >
         <svg
@@ -237,7 +237,7 @@ export function RightPanel(props: RightPanelProps) {
       {/* Panel -- desktop only, slides in/out */}
       <div
         className={`hidden md:flex fixed top-0 bottom-0 w-72 bg-gray-900/95 backdrop-blur border-l border-gray-700 z-30 flex-col overflow-hidden
-          transition-transform duration-500 ease-in-out ${panelOpen && guiReady ? 'right-0 translate-x-0' : 'right-0 translate-x-full'}`}
+          transition-transform ease-in-out ${guiReady ? 'duration-500' : 'duration-0'} ${panelOpen && guiReady ? 'right-0 translate-x-0' : 'right-0 translate-x-full'}`}
       >
         {/* Scrollable content area */}
         <div className="flex-1 overflow-y-auto flex flex-col">

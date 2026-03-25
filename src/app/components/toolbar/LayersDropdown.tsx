@@ -52,7 +52,7 @@ export function LayersDropdown({
   }, [layerOpen, onClose]);
 
   return (
-    <div ref={containerRef} className={`fixed top-4 left-4 z-40 flex items-center gap-2 transition-all duration-500 ${guiReady ? 'translate-x-0 opacity-100' : '-translate-x-4 opacity-0'}`}>
+    <div ref={containerRef} className={`fixed top-4 left-4 z-40 flex items-center gap-2 transition-all ${guiReady ? 'duration-500 translate-x-0 opacity-100' : 'duration-0 -translate-x-4 opacity-0'}`}>
       <button
         onClick={onToggleOpen}
         className="h-10 px-4 rounded-xl bg-white/90 backdrop-blur shadow-lg flex items-center gap-2 text-gray-800 hover:bg-white transition-all"

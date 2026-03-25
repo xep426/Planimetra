@@ -181,7 +181,7 @@ export function ActionBar({
   return (
     <>
       {/* ===== BOTTOM CENTER: Undo + Context actions + Redo ===== */}
-      <div className={`md:hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-40 transition-all duration-500 ${guiReady ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`}>
+      <div className={`md:hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-40 transition-all ${guiReady ? 'duration-500 translate-y-0 opacity-100' : 'duration-0 translate-y-4 opacity-0'}`}>
         <div className="relative">
           {renderOverride && (
             <div className={`absolute inset-0 flex items-center justify-center transition-opacity duration-200 ${showMobile ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>

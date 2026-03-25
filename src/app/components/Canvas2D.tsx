@@ -42,7 +42,7 @@ import {
   useGestures, useFloorPlanReducer, useProjectManager,
 } from '../hooks';
 
-export function Canvas2D({ guiReady = true }: { guiReady?: boolean }) {
+export function Canvas2D({ guiReady = true, onNewProject }: { guiReady?: boolean; onNewProject?: () => void }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const drawSceneRef = useRef<((ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) => void) | null>(null);
   const labelBoundsRef = useRef<LabelBounds[]>([]);
@@ -233,6 +233,7 @@ export function Canvas2D({ guiReady = true }: { guiReady?: boolean }) {
   const confirmNewProject = () => {
     setShowNewProjectDialog(false);
     handleClearAll();
+    onNewProject?.();
   };
 
   const recenterGeometry = () => {
