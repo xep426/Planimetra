@@ -6,7 +6,7 @@ Yet another 2D floor-plan sketcher -- except it's the one I wanted to use, so I 
 
 ## Live Demo
 
-- https://planimetra.vercel.app/
+- https://planimetra.com
 
 ## Features
 
