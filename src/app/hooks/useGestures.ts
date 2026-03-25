@@ -81,6 +81,9 @@ export interface UseGesturesParams {
 
   // Close-loop callback: fires when user drags between two open-loop endpoints
   onCloseLoop: (sourceNodeId: string, targetNodeId: string) => void;
+
+  // Mobile: tap on already-selected element triggers edit
+  onEditCurrent?: () => void;
 }
 
 // ---------------------------------------------------------------------------
@@ -269,11 +272,25 @@ export function useGestures(p: UseGesturesParams) {
   // processTap -- called on a quick tap (no drag)
   // ---------------------------------------------------------------------------
 
-  const processTap = (sx: number, sy: number) => {
+  const processTap = (sx: number, sy: number, isTouch = false) => {
     const { x: wx, y: wy } = p.screenToWorld(sx, sy);
 
     // Clear validation errors on any tap
     p.setValidationError(null);
+
+    // Mobile: tap on already-selected element triggers edit
+    if (isTouch && p.onEditCurrent) {
+      const hitLabel = p.findLabelAt(wx, wy);
+      if (hitLabel) {
+        const alreadySelected =
+          (p.selectedTool === 'wall'    && hitLabel.id === p.selectedWallId)    ||
+          (p.selectedTool === 'window'  && hitLabel.id === p.selectedWindowId)  ||
+          (p.selectedTool === 'door'    && hitLabel.id === p.selectedDoorId)    ||
+          (p.selectedTool === 'passage' && hitLabel.id === p.selectedPassageId) ||
+          (p.selectedTool === 'column'  && hitLabel.id === p.selectedColumnId);
+        if (alreadySelected) { p.onEditCurrent(); return; }
+      }
+    }
 
     // Cross-layer label/object hit
     if (tryCrossLayerHit(wx, wy)) return;
@@ -409,34 +426,42 @@ export function useGestures(p: UseGesturesParams) {
       lastPreviewLineRef.current = preview;
       p.setPreviewLine(preview);
     } else {
-      // Snap direction from source node
-      const dir = p.snapDirection(sourceNode.x, sourceNode.y, snx, sny, dragSourceRef.current);
-      if (dir) {
-        _lastPreviewDir = dir;
-        const dx = snx - sourceNode.x;
-        const dy = sny - sourceNode.y;
-        const projLen = dx * dir.directionX + dy * dir.directionY;
-        const projX = sourceNode.x + dir.directionX * projLen;
-        const projY = sourceNode.y + dir.directionY * projLen;
-        const preview: PreviewLine = {
-          fromNodeId: dragSourceRef.current,
-          toX: projX,
-          toY: projY,
-          directionX: dir.directionX,
-          directionY: dir.directionY,
-        };
-        lastPreviewLineRef.current = preview;
-        p.setPreviewLine(preview);
-      } else {
+      // Constrained node: snap to 90° intervals relative to existing wall direction
+      const raw = Math.atan2(sny - sourceNode.y, snx - sourceNode.x);
+      const existingWall = p.walls.find(w => w.nodeA === dragSourceRef.current || w.nodeB === dragSourceRef.current);
+      const base = (() => {
+        if (!existingWall) return null;
+        const nA = p.nodes.find(n => n.id === existingWall.nodeA);
+        const nB = p.nodes.find(n => n.id === existingWall.nodeB);
+        if (!nA || !nB) return null;
+        return existingWall.nodeA === dragSourceRef.current
+          ? Math.atan2(nB.y - nA.y, nB.x - nA.x)
+          : Math.atan2(nA.y - nB.y, nA.x - nB.x);
+      })();
+      const diff = raw - (base ?? 0);
+      const n = Math.round(diff / (Math.PI / 2));
+      // Collinear with existing wall — ignore gesture (only when a wall exists)
+      if (base !== null && ((n % 4) + 4) % 4 === 0) {
         _lastPreviewDir = null;
-        const preview: PreviewLine = {
-          fromNodeId: dragSourceRef.current,
-          toX: snx,
-          toY: sny,
-        };
-        lastPreviewLineRef.current = preview;
-        p.setPreviewLine(preview);
+        p.setPreviewLine(null);
+        return;
       }
+      const snapped = n * (Math.PI / 2) + (base ?? 0);
+      const dirX = Math.cos(snapped);
+      const dirY = Math.sin(snapped);
+      const dx = snx - sourceNode.x;
+      const dy = sny - sourceNode.y;
+      const projLen = dx * dirX + dy * dirY;
+      _lastPreviewDir = { directionX: dirX, directionY: dirY };
+      const preview: PreviewLine = {
+        fromNodeId: dragSourceRef.current,
+        toX: sourceNode.x + dirX * projLen,
+        toY: sourceNode.y + dirY * projLen,
+        directionX: dirX,
+        directionY: dirY,
+      };
+      lastPreviewLineRef.current = preview;
+      p.setPreviewLine(preview);
     }
   };
 
@@ -492,8 +517,6 @@ export function useGestures(p: UseGesturesParams) {
         }
       }
     }
-    const { x: snx, y: sny } = p.snapped(wx, wy);
-
     // Check for close-loop: dragging between open-loop endpoints
     if (nearNode && openEndpoints) {
       const { nodeA: epA, nodeB: epB } = openEndpoints;
@@ -529,48 +552,16 @@ export function useGestures(p: UseGesturesParams) {
       p.saveHistory([...p.nodes], [...p.walls, newWall]);
     } else {
       // Drag to empty space: open length prompt
-      const isFreeAngle = p.unconstrainedNodes.has(sourceId);
-
-      if (isFreeAngle) {
-        // Unconstrained: use raw direction, no angle snapping
-        const dx = snx - sourceNode.x;
-        const dy = sny - sourceNode.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < 1) return; // too close, ignore
-        p.setPendingConnection({
-          nodeA: sourceId,
-          nodeB: '',
-          directionX: dx / dist,
-          directionY: dy / dist,
-          fixedX: sourceNode.x,
-          fixedY: sourceNode.y,
-        });
-      } else {
-        const dir = _lastPreviewDir;
-        if (dir) {
-          p.setPendingConnection({
-            nodeA: sourceId,
-            nodeB: '',
-            directionX: dir.directionX,
-            directionY: dir.directionY,
-            fixedX: sourceNode.x,
-            fixedY: sourceNode.y,
-          });
-        } else {
-          const dx = snx - sourceNode.x;
-          const dy = sny - sourceNode.y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 1) return; // too close, ignore
-          p.setPendingConnection({
-            nodeA: sourceId,
-            nodeB: '',
-            directionX: dx / dist,
-            directionY: dy / dist,
-            fixedX: sourceNode.x,
-            fixedY: sourceNode.y,
-          });
-        }
-      }
+      const dir = _lastPreviewDir;
+      if (!dir) return; // no valid direction (collinear or no preview) — ignore
+      p.setPendingConnection({
+        nodeA: sourceId,
+        nodeB: '',
+        directionX: dir.directionX,
+        directionY: dir.directionY,
+        fixedX: sourceNode.x,
+        fixedY: sourceNode.y,
+      });
       p.setShowLengthPrompt(true);
     }
   };
@@ -871,7 +862,7 @@ export function useGestures(p: UseGesturesParams) {
       if (isDraggingWallRef.current) {
         endWallDrag(lastTouch.x, lastTouch.y, true);
       } else {
-        processTap(lastTouch.x, lastTouch.y);
+        processTap(lastTouch.x, lastTouch.y, true);
       }
       dragSourceRef.current = null;
       dragStartScreenRef.current = null;
@@ -890,7 +881,7 @@ export function useGestures(p: UseGesturesParams) {
         const dx = lastTouch.x - dragStartScreenRef.current.x;
         const dy = lastTouch.y - dragStartScreenRef.current.y;
         if (Math.sqrt(dx * dx + dy * dy) < DRAG_THRESHOLD_TOUCH) {
-          processTap(lastTouch.x, lastTouch.y);
+          processTap(lastTouch.x, lastTouch.y, true);
         }
       }
     }

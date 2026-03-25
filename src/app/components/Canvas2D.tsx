@@ -444,7 +444,23 @@ export function Canvas2D({ guiReady = true, onNewProject }: { guiReady?: boolean
     snapDirection, toggleNodeConstraint,
     saveHistory,
     onCloseLoop: handleCloseLoopDrag,
+    onEditCurrent: () => {
+      if (selectedTool === 'wall')    handleEditWallClick();
+      else if (selectedTool === 'window')  handleAddOrEditWindow();
+      else if (selectedTool === 'door')    handleAddOrEditDoor();
+      else if (selectedTool === 'passage') handleAddOrEditPassage();
+      else if (selectedTool === 'column')  handleAddOrEditColumn();
+    },
   });
+
+  // Attach wheel listener as non-passive so preventDefault works
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const onWheel = (e: WheelEvent) => handleWheel(e as unknown as React.WheelEvent);
+    canvas.addEventListener('wheel', onWheel, { passive: false });
+    return () => canvas.removeEventListener('wheel', onWheel);
+  }, [handleWheel]);
 
   // ---- renderScene -----------------------------------------------------------
 
@@ -647,7 +663,6 @@ export function Canvas2D({ guiReady = true, onNewProject }: { guiReady?: boolean
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
-        onWheel={handleWheel}
         onContextMenu={e => e.preventDefault()}
       />
 

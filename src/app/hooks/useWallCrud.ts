@@ -131,15 +131,23 @@ export function useWallCrud({
 
           if (solvedNodes) {
             updatedNodes = solvedNodes;
+            // Sync every wall's stored length to actual node distance after solver moves nodes
+            const nodeMap = new Map(solvedNodes.map(n => [n.id, n]));
+            updatedWalls = updatedWalls.map(w => {
+              const nA = nodeMap.get(w.nodeA);
+              const nB = nodeMap.get(w.nodeB);
+              if (!nA || !nB) return w;
+              return { ...w, length: Math.hypot(nB.x - nA.x, nB.y - nA.y) / 100 };
+            });
           } else {
             setValidationError('Cannot re-close the loop with that wall length \u2014 geometry is impossible.');
             return;
           }
         } else {
-          updatedNodes = moveNodeBAlongWall(nodes, wall, newLengthM);
+          updatedNodes = moveNodeBAlongWall(nodes, walls, wall, newLengthM);
         }
       } else {
-        updatedNodes = moveNodeBAlongWall(nodes, wall, newLengthM);
+        updatedNodes = moveNodeBAlongWall(nodes, walls, wall, newLengthM);
       }
     }
 
@@ -235,8 +243,8 @@ export function useWallCrud({
   };
 }
 
-/** Move nodeB along the existing wall direction to achieve the new length */
-function moveNodeBAlongWall(nodes: Node[], wall: Wall, newLengthM: number): Node[] {
+/** Move nodeB along the existing wall direction and cascade all downstream nodes by the same delta */
+function moveNodeBAlongWall(nodes: Node[], walls: Wall[], wall: Wall, newLengthM: number): Node[] {
   const nA = nodes.find(n => n.id === wall.nodeA);
   const nB = nodes.find(n => n.id === wall.nodeB);
   if (!nA || !nB) return nodes;
@@ -246,14 +254,29 @@ function moveNodeBAlongWall(nodes: Node[], wall: Wall, newLengthM: number): Node
   const currentLen = Math.hypot(dx, dy);
   if (currentLen < 0.001) return nodes;
 
+  const newLenCm = newLengthM * 100;
   const dirX = dx / currentLen;
   const dirY = dy / currentLen;
-  const newLenCm = newLengthM * 100;
+  const deltaX = dirX * (newLenCm - currentLen);
+  const deltaY = dirY * (newLenCm - currentLen);
+
+  // BFS from nodeB (excluding nodeA) to find all downstream nodes to translate
+  const downstream = new Set<string>();
+  const queue = [wall.nodeB];
+  while (queue.length > 0) {
+    const cur = queue.shift()!;
+    if (downstream.has(cur)) continue;
+    downstream.add(cur);
+    for (const w of walls) {
+      if (w.id === wall.id) continue;
+      if (w.nodeA === cur && !downstream.has(w.nodeB)) queue.push(w.nodeB);
+      if (w.nodeB === cur && !downstream.has(w.nodeA)) queue.push(w.nodeA);
+    }
+  }
+  downstream.delete(wall.nodeA);
 
   return nodes.map(n =>
-    n.id === wall.nodeB
-      ? { ...n, x: nA.x + dirX * newLenCm, y: nA.y + dirY * newLenCm }
-      : n
+    downstream.has(n.id) ? { ...n, x: n.x + deltaX, y: n.y + deltaY } : n
   );
 }
 
