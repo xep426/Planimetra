@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Canvas2D } from './components/Canvas2D';
 import { SplashScreen } from './components/SplashScreen';
+import { Toaster } from './components/ui/sonner';
 import { registerPWA } from './utils/pwaRegister';
 
 function hasExistingData(): boolean {
@@ -34,6 +35,7 @@ export default function App() {
     <div className="fixed inset-0 overflow-hidden bg-gray-900">
       {!ready && <SplashScreen onReady={handleReady} />}
       <Canvas2D guiReady={ready} onNewProject={handleNewProject} />
+      <Toaster />
     </div>
   );
 }

@@ -150,8 +150,19 @@ export function drawWalls(ctx: CanvasRenderingContext2D, dc: DrawContext) {
   });
 }
 
-export function drawWallLabels(ctx: CanvasRenderingContext2D, dc: DrawContext) {
-  const { nodes, walls, windows, doors, passages, columns, transform, selectedWallId, selectedTool } = dc;
+interface WallLabelDrawEntry {
+  centerX: number; centerY: number;
+  rw: number; rh: number;
+  txt: string; sel: boolean; selColor: string;
+}
+let _wallLabelDrawQueue: WallLabelDrawEntry[] = [];
+
+// Pass 1: compute placements, register bounds, enqueue draw data.
+// Must be called before object-label draw functions so wall labels occupy
+// space in dc.labelBounds and objects avoid them.
+export function computeWallLabels(ctx: CanvasRenderingContext2D, dc: DrawContext) {
+  _wallLabelDrawQueue = [];
+  const { nodes, walls, columns, transform, selectedWallId, selectedTool } = dc;
   const newLabelBounds: LabelBounds[] = [];
   const wallExteriorPerp = _lastWallExteriorPerp;
 
@@ -161,18 +172,15 @@ export function drawWallLabels(ctx: CanvasRenderingContext2D, dc: DrawContext) {
     if (!nA || !nB) return;
     const sel = wall.id === selectedWallId;
 
-    // Calculate wall direction for label positioning
     const dx = nB.x - nA.x;
     const dy = nB.y - nA.y;
     const len = Math.sqrt(dx * dx + dy * dy);
     const perpX = -dy / len;
     const perpY = dx / len;
-
     const wallLengthM = len / 100;
     const dirX = dx / len;
     const dirY = dy / len;
 
-    // --- Determine wall segments split by flush (inset=0) columns ---
     const flushCols = columns
       .filter(c => c.wallId === wall.id && (c.inset ?? 0) === 0)
       .sort((a, b) => a.position - b.position);
@@ -189,17 +197,12 @@ export function drawWallLabels(ctx: CanvasRenderingContext2D, dc: DrawContext) {
         const halfWidth = col.width / 2;
         const colStart = Math.max(0, centerM - halfWidth);
         const colEnd = Math.min(wallLengthM, centerM + halfWidth);
-        if (colStart > cursor + 0.001) {
-          segments.push({ startM: cursor, endM: colStart });
-        }
+        if (colStart > cursor + 0.001) segments.push({ startM: cursor, endM: colStart });
         cursor = colEnd;
       }
-      if (cursor < wallLengthM - 0.001) {
-        segments.push({ startM: cursor, endM: wallLengthM });
-      }
+      if (cursor < wallLengthM - 0.001) segments.push({ startM: cursor, endM: wallLengthM });
     }
 
-    // --- Draw a label for each segment ---
     for (const seg of segments) {
       const segLenM = seg.endM - seg.startM;
       if (segLenM < 0.001) continue;
@@ -209,10 +212,9 @@ export function drawWallLabels(ctx: CanvasRenderingContext2D, dc: DrawContext) {
       const baseMidY = nA.y + dirY * segMidM * 100;
 
       const ext = wallExteriorPerp.get(wall.id);
-      const offsetX = ext ? ext.perpX * wall.thickness / 2 : perpX * wall.thickness / 2;
-      const offsetY = ext ? ext.perpY * wall.thickness / 2 : perpY * wall.thickness / 2;
-      const midX = baseMidX + offsetX;
-      const midY = baseMidY + offsetY;
+      const extSign = ext
+        ? (ext.perpX * perpX + ext.perpY * perpY) > 0 ? 1 : -1
+        : 1;
 
       ctx.font = '11px monospace';
       const txt = segLenM.toFixed(3) + '\u2009m';
@@ -222,35 +224,53 @@ export function drawWallLabels(ctx: CanvasRenderingContext2D, dc: DrawContext) {
       const labelWidth = rw / transform.scale;
       const labelHeight = rh / transform.scale;
 
-      const labelCenterX = midX;
-      const labelCenterY = midY;
-
-      newLabelBounds.push({
-        id: wall.id,
-        type: 'wall',
-        x: labelCenterX,
-        y: labelCenterY,
-        width: labelWidth,
-        height: labelHeight,
+      const placement = findLabelPlacement({
+        anchorX: baseMidX,
+        anchorY: baseMidY,
+        perpX, perpY,
+        preferredSide: extSign,
+        labelWidth, labelHeight,
+        naturalOffset: wall.thickness / 2 * transform.scale,
+        scale: transform.scale,
+        rotation: transform.rotation,
+        existingBounds: [...dc.labelBounds, ...newLabelBounds],
       });
 
-      ctx.save();
-      ctx.translate(labelCenterX, labelCenterY);
-      ctx.rotate(-transform.rotation);
-      ctx.scale(1 / transform.scale, 1 / transform.scale);
-      ctx.fillStyle = 'rgba(26, 26, 26, 0.85)';
+      newLabelBounds.push({
+        id: wall.id, type: 'wall',
+        x: placement.x, y: placement.y,
+        width: labelWidth, height: labelHeight,
+      });
+
       const labelSelColor = selectedTool === 'wall' ? '#f97316' : '#22c55e';
-      ctx.strokeStyle = sel ? labelSelColor : '#666666';
-      ctx.lineWidth = sel ? 2 : 1;
-      ctx.fillRect(-rw / 2, -rh / 2, rw, rh);
-      ctx.strokeRect(-rw / 2, -rh / 2, rw, rh);
-      ctx.fillStyle = '#cccccc';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(txt, 0, 0);
-      ctx.restore();
+      _wallLabelDrawQueue.push({
+        centerX: placement.x, centerY: placement.y,
+        rw, rh, txt, sel, selColor: labelSelColor,
+      });
     }
   });
 
   dc.labelBounds.push(...newLabelBounds);
+}
+
+// Pass 2: paint the pre-computed wall labels on top of everything.
+export function drawWallLabels(ctx: CanvasRenderingContext2D, dc: DrawContext) {
+  const { transform } = dc;
+  for (const d of _wallLabelDrawQueue) {
+    ctx.save();
+    ctx.translate(d.centerX, d.centerY);
+    ctx.rotate(-transform.rotation);
+    ctx.scale(1 / transform.scale, 1 / transform.scale);
+    ctx.fillStyle = 'rgba(26, 26, 26, 0.85)';
+    ctx.strokeStyle = d.sel ? d.selColor : '#666666';
+    ctx.lineWidth = d.sel ? 2 : 1;
+    ctx.fillRect(-d.rw / 2, -d.rh / 2, d.rw, d.rh);
+    ctx.strokeRect(-d.rw / 2, -d.rh / 2, d.rw, d.rh);
+    ctx.fillStyle = '#cccccc';
+    ctx.font = '11px monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(d.txt, 0, 0);
+    ctx.restore();
+  }
 }

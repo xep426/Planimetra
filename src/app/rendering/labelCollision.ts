@@ -1,30 +1,16 @@
 import type { LabelBounds } from '../types';
 
-/**
- * Lightweight label-collision nudge.
- *
- * Places the label at its natural position first.  If it actually overlaps
- * an existing label, nudge it outward in small steps along the perpendicular
- * until clear (or give up and keep best position).  Always draws.
- */
-
 interface LabelPlacementOpts {
-  /** Anchor point in world coords. */
   anchorX: number;
   anchorY: number;
-  /** Unit perpendicular direction away from the wall. */
   perpX: number;
   perpY: number;
-  /** +1 or -1 -- preferred side. */
   preferredSide: number;
-  /** World-space label dimensions. */
   labelWidth: number;
   labelHeight: number;
-  /** Natural offset in screen-px (divided by scale internally). */
   naturalOffset: number;
-  /** Current transform scale. */
   scale: number;
-  /** Existing labels to check against. */
+  rotation: number;
   existingBounds: LabelBounds[];
 }
 
@@ -34,63 +20,90 @@ export interface PlacementResult {
   draw: true;
 }
 
+// Check overlap in screen-rotated space — labels are screen-aligned, so their
+// AABB is in screen coordinates. Rotate the centre-to-centre vector by the
+// canvas rotation before comparing against the half-extents.
 function rectsOverlap(
   x1: number, y1: number, w1: number, h1: number,
   x2: number, y2: number, w2: number, h2: number,
+  cosR: number, sinR: number,
 ): boolean {
+  const dx = x2 - x1;
+  const dy = y2 - y1;
+  const dxRot = dx * cosR - dy * sinR;
+  const dyRot = dx * sinR + dy * cosR;
   return !(
-    x1 + w1 / 2 < x2 - w2 / 2 ||
-    x1 - w1 / 2 > x2 + w2 / 2 ||
-    y1 + h1 / 2 < y2 - h2 / 2 ||
-    y1 - h1 / 2 > y2 + h2 / 2
+    Math.abs(dxRot) >= (w1 + w2) / 2 ||
+    Math.abs(dyRot) >= (h1 + h2) / 2
   );
 }
 
-function hasOverlap(
-  x: number, y: number,
-  w: number, h: number,
-  existingBounds: LabelBounds[],
-): boolean {
-  for (const b of existingBounds) {
-    if (rectsOverlap(x, y, w, h, b.x, b.y, b.width, b.height)) {
-      return true;
-    }
+function hasOverlap(x: number, y: number, w: number, h: number, bounds: LabelBounds[], cosR: number, sinR: number): boolean {
+  for (const b of bounds) {
+    if (rectsOverlap(x, y, w, h, b.x, b.y, b.width, b.height, cosR, sinR)) return true;
   }
   return false;
 }
 
 export function findLabelPlacement(opts: LabelPlacementOpts): PlacementResult {
-  const {
-    anchorX, anchorY, perpX, perpY, preferredSide,
-    labelWidth, labelHeight, naturalOffset, scale,
-    existingBounds,
-  } = opts;
+  const { anchorX, anchorY, perpX, perpY, preferredSide, labelWidth, labelHeight, naturalOffset, scale, rotation, existingBounds } = opts;
+
+  const cosR = Math.cos(rotation);
+  const sinR = Math.sin(rotation);
+
+  // Along-wall direction
+  const dirX = -perpY;
+  const dirY = perpX;
 
   const off = naturalOffset / scale;
-  const posX = anchorX + perpX * preferredSide * off;
-  const posY = anchorY + perpY * preferredSide * off;
 
-  // No overlap -> keep natural position
-  if (!hasOverlap(posX, posY, labelWidth, labelHeight, existingBounds)) {
-    return { x: posX, y: posY, draw: true };
-  }
+  // Steps proportional to label size — zoom-independent
+  const perpStep = labelHeight * 1.1;
+  const alongStep = labelWidth * 0.6;
 
-  // Nudge in small 10-screen-px steps outward on the same side, then opposite
-  const step = 10 / scale;
   const sides = [preferredSide, -preferredSide];
 
   for (const side of sides) {
     const baseX = anchorX + perpX * side * off;
     const baseY = anchorY + perpY * side * off;
-    for (let i = 1; i <= 4; i++) {
-      const nx = baseX + perpX * side * step * i;
-      const ny = baseY + perpY * side * step * i;
-      if (!hasOverlap(nx, ny, labelWidth, labelHeight, existingBounds)) {
-        return { x: nx, y: ny, draw: true };
+
+    // Check natural position first
+    if (!hasOverlap(baseX, baseY, labelWidth, labelHeight, existingBounds, cosR, sinR)) {
+      return { x: baseX, y: baseY, draw: true };
+    }
+
+    // Expand outward perpendicularly, trying along-wall offsets at each step
+    for (let p = 1; p <= 12; p++) {
+      const px = baseX + perpX * side * perpStep * p;
+      const py = baseY + perpY * side * perpStep * p;
+
+      if (!hasOverlap(px, py, labelWidth, labelHeight, existingBounds, cosR, sinR)) {
+        return { x: px, y: py, draw: true };
+      }
+
+      for (const along of [1, -1]) {
+        for (let a = 1; a <= 6; a++) {
+          const cx = px + dirX * along * alongStep * a;
+          const cy = py + dirY * along * alongStep * a;
+          if (!hasOverlap(cx, cy, labelWidth, labelHeight, existingBounds, cosR, sinR)) {
+            return { x: cx, y: cy, draw: true };
+          }
+        }
+      }
+    }
+
+    // Pure along-wall sweep at natural offset
+    for (const along of [1, -1]) {
+      for (let a = 1; a <= 12; a++) {
+        const cx = baseX + dirX * along * alongStep * a;
+        const cy = baseY + dirY * along * alongStep * a;
+        if (!hasOverlap(cx, cy, labelWidth, labelHeight, existingBounds, cosR, sinR)) {
+          return { x: cx, y: cy, draw: true };
+        }
       }
     }
   }
 
-  // Give up -- draw at natural position anyway
-  return { x: posX, y: posY, draw: true };
+  // Fallback: natural position
+  return { x: anchorX + perpX * preferredSide * off, y: anchorY + perpY * preferredSide * off, draw: true };
 }

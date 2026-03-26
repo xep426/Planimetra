@@ -34,7 +34,7 @@ import {
 } from './ui/alert-dialog';
 import { LayersDropdown, AppMenu, ActionBar, RightPanel } from './toolbar';
 import {
-  type DrawContext, drawGrid, drawNodes, drawWalls, drawWallLabels, drawWindows,
+  type DrawContext, drawGrid, drawNodes, drawWalls, computeWallLabels, drawWallLabels, drawWindows,
   drawDoors, drawPassages, drawColumns, drawPreviewLine, drawRoomLabel, drawSetbackIndicators,
 } from '../rendering';
 import {
@@ -512,6 +512,7 @@ export function Canvas2D({ guiReady = true, onNewProject }: { guiReady?: boolean
     ctx.scale(transform.scale, transform.scale);
     ctx.translate(transform.x, transform.y);
     drawWalls(ctx, dc);
+    computeWallLabels(ctx, dc);
     drawWindows(ctx, dc);
     drawDoors(ctx, dc);
     drawPassages(ctx, dc);

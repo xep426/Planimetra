@@ -1,7 +1,7 @@
 export type { DrawContext } from './types';
 export { drawGrid } from './drawGrid';
 export { drawNodes } from './drawNodes';
-export { drawWalls, drawWallLabels } from './drawWalls';
+export { drawWalls, computeWallLabels, drawWallLabels } from './drawWalls';
 export { drawWindows } from './drawWindows';
 export { drawDoors } from './drawDoors';
 export { drawPassages } from './drawPassages';

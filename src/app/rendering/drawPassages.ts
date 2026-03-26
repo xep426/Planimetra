@@ -45,12 +45,11 @@ export function drawPassages(ctx: CanvasRenderingContext2D, dc: DrawContext) {
     ctx.restore();
 
     // Draw label on one consistent side
-    ctx.font = '9px monospace';
+    ctx.font = '11px monospace';
     const txt = `PASSAGE ${passage.width.toFixed(3)}m`;
     const tw = ctx.measureText(txt).width;
     const rw = (tw + 8) / transform.scale;
-    const rh = 14 / transform.scale;
-
+    const rh = 18 / transform.scale;
     const placement = findLabelPlacement({
       anchorX: passageX,
       anchorY: passageY,
@@ -59,8 +58,9 @@ export function drawPassages(ctx: CanvasRenderingContext2D, dc: DrawContext) {
       preferredSide: 1,
       labelWidth: rw,
       labelHeight: rh,
-      naturalOffset: 40,
+      naturalOffset: wall.thickness / 2 * transform.scale + 27,
       scale: transform.scale,
+      rotation: transform.rotation,
       existingBounds: labelBounds,
     });
 
@@ -76,7 +76,7 @@ export function drawPassages(ctx: CanvasRenderingContext2D, dc: DrawContext) {
       ctx.fillStyle = isSelected ? '#9a3412' : (isPassageMode ? '#1e40af' : '#2a2a2a');
       ctx.strokeStyle = isSelected ? '#ea580c' : (isPassageMode ? '#3b82f6' : '#444444');
       ctx.lineWidth = isSelected ? 1.5 : 1;
-      ctx.font = '9px monospace';
+      ctx.font = '11px monospace';
 
       ctx.fillRect(-rw * transform.scale / 2, -rh * transform.scale / 2, rw * transform.scale, rh * transform.scale);
       ctx.strokeRect(-rw * transform.scale / 2, -rh * transform.scale / 2, rw * transform.scale, rh * transform.scale);

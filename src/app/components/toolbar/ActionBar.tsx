@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { toast } from 'sonner';
 import type { LayerType } from '../../types';
 
 interface ActionBarProps {
@@ -59,6 +60,8 @@ export function ActionBar({
   }, []);
   const showLabels = windowWidth >= labelThreshold;
 
+  const disabledToast = (msg: string) => toast.error(msg, { duration: 2000 });
+
   // Round icon-only button
   const iconBtn = (active: boolean, green = false) =>
     `w-11 h-11 rounded-full shadow-lg flex items-center justify-center transition-all active:scale-90 ${
@@ -93,10 +96,11 @@ export function ActionBar({
   // Context action (right of divider)
   const contextAction = (() => {
     if (selectedTool === 'wall') {
+      const active = !!selectedWallId;
       return (
-        <button onClick={onEditWall} disabled={!selectedWallId} className={showLabels ? labelBtn(!!selectedWallId) : iconBtn(!!selectedWallId)}
-          title={selectedWallId ? 'Edit Wall' : 'Select a wall first'}>
-          {editIcon}{label('Wall')}
+        <button onClick={active ? onEditWall : () => disabledToast('Select a wall first')}
+          className={showLabels ? labelBtn(active) : iconBtn(active)}>
+          {editIcon}{label('Edit Wall')}
         </button>
       );
     }
@@ -104,8 +108,8 @@ export function ActionBar({
       const active = !!selectedWindowId || !!selectedWallId;
       const green = !selectedWindowId && !!selectedWallId;
       return (
-        <button onClick={onAddOrEditWindow} disabled={!active} className={showLabels ? labelBtn(active, green) : iconBtn(active, green)}
-          title={selectedWindowId ? 'Edit Window' : selectedWallId ? 'Add Window' : 'Select a wall or window'}>
+        <button onClick={active ? onAddOrEditWindow : () => disabledToast('Select a wall first')}
+          className={showLabels ? labelBtn(active, green) : iconBtn(active, green)}>
           {selectedWindowId ? editIcon : addIcon}
           {label(selectedWindowId ? 'Edit Window' : 'Add Window')}
         </button>
@@ -115,8 +119,8 @@ export function ActionBar({
       const active = !!selectedDoorId || !!selectedWallId;
       const green = !selectedDoorId && !!selectedWallId;
       return (
-        <button onClick={onAddOrEditDoor} disabled={!active} className={showLabels ? labelBtn(active, green) : iconBtn(active, green)}
-          title={selectedDoorId ? 'Edit Door' : selectedWallId ? 'Add Door' : 'Select a wall or door'}>
+        <button onClick={active ? onAddOrEditDoor : () => disabledToast('Select a wall first')}
+          className={showLabels ? labelBtn(active, green) : iconBtn(active, green)}>
           {selectedDoorId ? editIcon : addIcon}
           {label(selectedDoorId ? 'Edit Door' : 'Add Door')}
         </button>
@@ -126,8 +130,8 @@ export function ActionBar({
       const active = !!selectedPassageId || !!selectedWallId;
       const green = !selectedPassageId && !!selectedWallId;
       return (
-        <button onClick={onAddOrEditPassage} disabled={!active} className={showLabels ? labelBtn(active, green) : iconBtn(active, green)}
-          title={selectedPassageId ? 'Edit Passage' : selectedWallId ? 'Add Passage' : 'Select a wall or passage'}>
+        <button onClick={active ? onAddOrEditPassage : () => disabledToast('Select a wall first')}
+          className={showLabels ? labelBtn(active, green) : iconBtn(active, green)}>
           {selectedPassageId ? editIcon : addIcon}
           {label(selectedPassageId ? 'Edit Passage' : 'Add Passage')}
         </button>
@@ -138,13 +142,13 @@ export function ActionBar({
       const green = !selectedColumnId && !!selectedWallId;
       const isMergeDisabled = columnsCount < 2;
       return (<>
-        <button onClick={onAddOrEditColumn} disabled={!active} className={showLabels ? labelBtn(active, green) : iconBtn(active, green)}
-          title={selectedColumnId ? 'Edit Column' : selectedWallId ? 'Place Column' : 'Select a wall first'}>
+        <button onClick={active ? onAddOrEditColumn : () => disabledToast('Select a wall first')}
+          className={showLabels ? labelBtn(active, green) : iconBtn(active, green)}>
           {selectedColumnId ? editIcon : addIcon}
           {label(selectedColumnId ? 'Edit Column' : 'Add Column')}
         </button>
-        <button onClick={onStartColumnJoin} disabled={isMergeDisabled} className={showLabels ? labelBtn(!isMergeDisabled) : iconBtn(!isMergeDisabled)}
-          title={isMergeDisabled ? 'Need at least 2 columns' : 'Merge Columns'}>
+        <button onClick={isMergeDisabled ? () => disabledToast('Need at least 2 columns to merge') : onStartColumnJoin}
+          className={showLabels ? labelBtn(!isMergeDisabled) : iconBtn(!isMergeDisabled)}>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <rect x="2" y="3" width="8" height="8" /><rect x="2" y="13" width="8" height="8" /><rect x="13" y="3" width="8" height="18" />
           </svg>
@@ -154,8 +158,8 @@ export function ActionBar({
     }
     if (selectedTool === 'column' && columnJoinMode) {
       return (<>
-        <button onClick={onJoinColumns} disabled={columnsToJoinCount < 2} className={iconBtn(columnsToJoinCount >= 2, true)}
-          title={columnsToJoinCount < 2 ? 'Select at least 2 columns' : 'Confirm Merge'}>
+        <button onClick={columnsToJoinCount < 2 ? () => disabledToast('Select at least 2 columns') : onJoinColumns}
+          className={iconBtn(columnsToJoinCount >= 2, true)}>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
         </button>
         <button onClick={onCancelColumnJoin} className="w-11 h-11 rounded-full shadow-lg flex items-center justify-center bg-white hover:bg-red-50 active:bg-red-100 active:scale-90 transition-all" title="Cancel Merge">
@@ -169,12 +173,12 @@ export function ActionBar({
   const normalButtons = (
     <div className="flex items-center gap-2">
       {/* Left: Undo + Redo */}
-      <button onClick={onUndo} disabled={!canUndo} className={iconBtn(canUndo)} title="Undo">
+      <button onClick={canUndo ? onUndo : () => disabledToast('Nothing to undo')} className={iconBtn(canUndo)} title="Undo">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <polyline points="9 14 4 9 9 4" /><path d="M20 20v-7a4 4 0 0 0-4-4H4" />
         </svg>
       </button>
-      <button onClick={onRedo} disabled={!canRedo} className={iconBtn(canRedo)} title="Redo">
+      <button onClick={canRedo ? onRedo : () => disabledToast('Nothing to redo')} className={iconBtn(canRedo)} title="Redo">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <polyline points="15 14 20 9 15 4" /><path d="M4 20v-7a4 4 0 0 1 4-4h12" />
         </svg>

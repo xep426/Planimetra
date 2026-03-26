@@ -272,25 +272,11 @@ export function useGestures(p: UseGesturesParams) {
   // processTap -- called on a quick tap (no drag)
   // ---------------------------------------------------------------------------
 
-  const processTap = (sx: number, sy: number, isTouch = false) => {
+  const processTap = (sx: number, sy: number) => {
     const { x: wx, y: wy } = p.screenToWorld(sx, sy);
 
     // Clear validation errors on any tap
     p.setValidationError(null);
-
-    // Mobile: tap on already-selected element triggers edit
-    if (isTouch && p.onEditCurrent) {
-      const hitLabel = p.findLabelAt(wx, wy);
-      if (hitLabel) {
-        const alreadySelected =
-          (p.selectedTool === 'wall'    && hitLabel.id === p.selectedWallId)    ||
-          (p.selectedTool === 'window'  && hitLabel.id === p.selectedWindowId)  ||
-          (p.selectedTool === 'door'    && hitLabel.id === p.selectedDoorId)    ||
-          (p.selectedTool === 'passage' && hitLabel.id === p.selectedPassageId) ||
-          (p.selectedTool === 'column'  && hitLabel.id === p.selectedColumnId);
-        if (alreadySelected) { p.onEditCurrent(); return; }
-      }
-    }
 
     // Cross-layer label/object hit
     if (tryCrossLayerHit(wx, wy)) return;
@@ -862,7 +848,7 @@ export function useGestures(p: UseGesturesParams) {
       if (isDraggingWallRef.current) {
         endWallDrag(lastTouch.x, lastTouch.y, true);
       } else {
-        processTap(lastTouch.x, lastTouch.y, true);
+        processTap(lastTouch.x, lastTouch.y);
       }
       dragSourceRef.current = null;
       dragStartScreenRef.current = null;
@@ -881,7 +867,7 @@ export function useGestures(p: UseGesturesParams) {
         const dx = lastTouch.x - dragStartScreenRef.current.x;
         const dy = lastTouch.y - dragStartScreenRef.current.y;
         if (Math.sqrt(dx * dx + dy * dy) < DRAG_THRESHOLD_TOUCH) {
-          processTap(lastTouch.x, lastTouch.y, true);
+          processTap(lastTouch.x, lastTouch.y);
         }
       }
     }

@@ -124,12 +124,11 @@ export function drawColumns(ctx: CanvasRenderingContext2D, dc: DrawContext) {
     ctx.restore();
 
     // Draw label
-    ctx.font = '9px monospace';
+    ctx.font = '11px monospace';
     const txt = `COL ${column.width.toFixed(3)}\u00D7${column.depth.toFixed(3)}m`;
     const tw = ctx.measureText(txt).width;
     const rw = (tw + 8) / transform.scale;
-    const rh = 14 / transform.scale;
-
+    const rh = 18 / transform.scale;
     const perpX = (-dy / len) * intSign;
     const perpY = (dx / len) * intSign;
     const columnCenterOffset = (insetCm + depthCm / 2);
@@ -144,6 +143,7 @@ export function drawColumns(ctx: CanvasRenderingContext2D, dc: DrawContext) {
       labelHeight: rh,
       naturalOffset: 40,
       scale: transform.scale,
+      rotation: transform.rotation,
       existingBounds: labelBounds,
     });
 
@@ -159,7 +159,7 @@ export function drawColumns(ctx: CanvasRenderingContext2D, dc: DrawContext) {
       ctx.fillStyle = isMarkedForJoin ? '#166534' : (isSelected ? '#9a3412' : (isColumnMode ? '#1e40af' : '#2a2a2a'));
       ctx.strokeStyle = isMarkedForJoin ? '#22c55e' : (isSelected ? '#ea580c' : (isColumnMode ? '#3b82f6' : '#444444'));
       ctx.lineWidth = isMarkedForJoin ? 1.5 : (isSelected ? 1.5 : 1);
-      ctx.font = '9px monospace';
+      ctx.font = '11px monospace';
 
       ctx.fillRect(-rw * transform.scale / 2, -rh * transform.scale / 2, rw * transform.scale, rh * transform.scale);
       ctx.strokeRect(-rw * transform.scale / 2, -rh * transform.scale / 2, rw * transform.scale, rh * transform.scale);
