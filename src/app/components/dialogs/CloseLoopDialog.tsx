@@ -15,7 +15,7 @@ export function CloseLoopDialog({
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
       onClick={e => { if (e.target === e.currentTarget) onCancel(); }}>
-      <div className="bg-gray-800 p-6 shadow-xl w-full h-full md:w-80 md:h-auto md:rounded-lg overflow-y-auto">
+      <div className="bg-gray-800 p-6 shadow-xl w-full h-full md:w-96 md:h-auto md:rounded-lg overflow-y-auto">
         <h3 className="text-white text-lg font-semibold mb-2">Close Loop</h3>
         <p className="text-gray-400 text-sm mb-4">Closing wall length (meters):</p>
         <input 
@@ -30,7 +30,7 @@ export function CloseLoopDialog({
         {validationError && <p className="text-red-400 text-sm mt-2">{validationError}</p>}
         <div className="flex gap-2 mt-4">
           <button onClick={onSubmit} className="flex-1 px-4 py-2 bg-cyan-500 text-white rounded hover:bg-cyan-600">Create Wall</button>
-          <button onClick={onCancel} className="flex-1 px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700">Cancel</button>
+          <button onClick={onCancel} className="flex-1 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-gray-300 rounded transition-colors">Cancel</button>
         </div>
       </div>
     </div>

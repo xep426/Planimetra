@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback, useEffect, type Dispatch } from 'react';
+import { toast } from 'sonner';
 import { saveMultiRoomProject, loadMultiRoomProject } from '../utils/projectFile';
 import type {
   Node, Wall, WindowObj, DoorObj, PassageObj, ColumnObj,
@@ -212,7 +213,7 @@ export function useProjectManager({
       setTimeout(() => { roomSwitchingRef.current = false; }, 100);
     } catch (err: any) {
       if (err?.message !== 'File selection cancelled') {
-        alert('Failed to load project: ' + (err?.message || 'Unknown error'));
+        toast.error('Failed to load project: ' + (err?.message || 'Unknown error'));
       }
     }
   }, [loadRoomIntoReducer]);

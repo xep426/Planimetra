@@ -6,3 +6,4 @@ export { PassageDialog } from './PassageDialog';
 export { ColumnDialog } from './ColumnDialog';
 export { WallEditDialog } from './WallEditDialog';
 export { WallDeleteConfirmDialog } from './WallDeleteConfirmDialog';
+export { DeleteRoomDialog } from './DeleteRoomDialog';

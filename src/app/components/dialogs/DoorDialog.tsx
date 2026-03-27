@@ -145,7 +145,7 @@ export function DoorDialog({
           </div>
           <button 
             onClick={onCancel} 
-            className="w-full px-4 py-3 bg-gray-700/50 text-gray-400 rounded hover:bg-gray-700 hover:text-gray-300 transition-colors">
+            className="w-full px-4 py-3 bg-gray-700 hover:bg-gray-600 text-gray-300 rounded transition-colors">
             Cancel
           </button>
         </div>

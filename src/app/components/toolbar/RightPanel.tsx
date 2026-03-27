@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { RoomData, Node, Wall, WindowObj, DoorObj, PassageObj, ColumnObj, LayerType } from '../../types';
 import { EditorSection } from './EditorSection';
+import { DeleteRoomDialog } from '../dialogs';
 
 // -- Compute room area in m^2 using Shoelace on ordered wall-loop nodes --------
 
@@ -192,6 +193,7 @@ export function RightPanel(props: RightPanelProps) {
   // -- Room CRUD --
   const [showNewRoomPrompt, setShowNewRoomPrompt] = useState(false);
   const [newRoomName, setNewRoomName] = useState('');
+  const [deletingRoom, setDeletingRoom] = useState<{ id: string; name: string } | null>(null);
   const [editingRoomId, setEditingRoomId] = useState<string | null>(null);
   const [editingRoomName, setEditingRoomName] = useState('');
 
@@ -360,7 +362,7 @@ export function RightPanel(props: RightPanelProps) {
                             <button
                               onClick={e => {
                                 e.stopPropagation();
-                                if (confirm(`Delete room "${room.name}"?`)) onDeleteRoom(room.id);
+                                setDeletingRoom({ id: room.id, name: room.name });
                               }}
                               className="p-0.5 hover:text-red-400 text-gray-500"
                               title="Delete Room"
@@ -514,6 +516,11 @@ export function RightPanel(props: RightPanelProps) {
           </div>
         </div>
       </div>
+      <DeleteRoomDialog
+        roomName={deletingRoom?.name ?? null}
+        onConfirm={() => { onDeleteRoom(deletingRoom!.id); setDeletingRoom(null); }}
+        onCancel={() => setDeletingRoom(null)}
+      />
     </>
   );
 }

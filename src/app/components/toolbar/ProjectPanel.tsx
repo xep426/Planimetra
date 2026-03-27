@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { RoomData } from '../../types';
+import { DeleteRoomDialog } from '../dialogs';
 
 interface ProjectPanelProps {
   panelOpen: boolean;
@@ -32,6 +33,7 @@ export function ProjectPanel({
   const [editingRoomName, setEditingRoomName] = useState('');
   const [editingProjectName, setEditingProjectName] = useState(false);
   const [projectNameDraft, setProjectNameDraft] = useState('');
+  const [deletingRoom, setDeletingRoom] = useState<{ id: string; name: string } | null>(null);
 
   const handleAddRoom = () => {
     const name = newRoomName.trim() || `Room ${rooms.length + 1}`;
@@ -203,7 +205,7 @@ export function ProjectPanel({
                             <button
                               onClick={e => {
                                 e.stopPropagation();
-                                if (confirm(`Delete room "${room.name}"?`)) onDeleteRoom(room.id);
+                                setDeletingRoom({ id: room.id, name: room.name });
                               }}
                               className="p-0.5 hover:text-red-400 text-gray-500"
                               title="Delete Room"
@@ -277,6 +279,11 @@ export function ProjectPanel({
           </div>
         </div>
       )}
+      <DeleteRoomDialog
+        roomName={deletingRoom?.name ?? null}
+        onConfirm={() => { onDeleteRoom(deletingRoom!.id); setDeletingRoom(null); }}
+        onCancel={() => setDeletingRoom(null)}
+      />
     </>
   );
 }

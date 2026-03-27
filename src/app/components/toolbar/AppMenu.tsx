@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { RoomData } from '../../types';
+import { DeleteRoomDialog } from '../dialogs';
 
 interface AppMenuProps {
   guiReady?: boolean;
@@ -56,6 +57,7 @@ export function AppMenu({
   // Room CRUD
   const [showNewRoomPrompt, setShowNewRoomPrompt] = useState(false);
   const [newRoomName, setNewRoomName] = useState('');
+  const [deletingRoom, setDeletingRoom] = useState<{ id: string; name: string } | null>(null);
   const [editingRoomId, setEditingRoomId] = useState<string | null>(null);
   const [editingRoomName, setEditingRoomName] = useState('');
 
@@ -229,7 +231,7 @@ export function AppMenu({
                                 <button
                                   onClick={e => {
                                     e.stopPropagation();
-                                    if (confirm(`Delete room "${room.name}"?`)) onDeleteRoom(room.id);
+                                    setDeletingRoom({ id: room.id, name: room.name });
                                   }}
                                   className="p-1 hover:text-red-400 text-gray-500 rounded"
                                   title="Delete Room"
@@ -326,6 +328,13 @@ export function AppMenu({
             </div>
           </div>
         </>
+    <>
+      <DeleteRoomDialog
+        roomName={deletingRoom?.name ?? null}
+        onConfirm={() => { onDeleteRoom(deletingRoom!.id); setDeletingRoom(null); }}
+        onCancel={() => setDeletingRoom(null)}
+      />
+    </>
     </>
   );
 }
