@@ -26,6 +26,8 @@ interface DoorDialogProps {
   onDelete?: () => void;
 }
 
+import { useState, useLayoutEffect, useRef } from 'react';
+
 export function DoorDialog({
   visible, wallLength, editingDoorId,
   opening, hinge, width, height, setback, fromNodeA,
@@ -35,6 +37,15 @@ export function DoorDialog({
   onSetbackChange, onFromNodeAChange, onValidationErrorChange,
   onSubmit, onCancel, onDelete,
 }: DoorDialogProps) {
+  const origRef = useRef({ opening, hinge, width, height, setback, fromNodeA });
+  const [applied, setApplied] = useState(false);
+  useLayoutEffect(() => {
+    if (visible) { origRef.current = { opening, hinge, width, height, setback, fromNodeA }; setApplied(false); }
+  }, [visible]);
+  const dirty = opening !== origRef.current.opening || hinge !== origRef.current.hinge ||
+    fromNodeA !== origRef.current.fromNodeA || width !== origRef.current.width ||
+    height !== origRef.current.height || setback !== origRef.current.setback;
+  const handleApply = () => { setApplied(true); setTimeout(onSubmit, 400); };
   if (!visible) return null;
 
   const isEditing = !!editingDoorId;
@@ -134,8 +145,9 @@ export function DoorDialog({
         {/* Action buttons -- visually separated from form */}
         <div className="border-t border-gray-600/50 mt-6 pt-4 space-y-3">
           <div className="flex gap-2">
-            <button onClick={onSubmit} className="flex-1 px-4 py-2.5 bg-cyan-500 text-white rounded hover:bg-cyan-600">
-              {isEditing ? 'Apply' : 'Place Door'}
+            <button onClick={handleApply}
+              className={`flex-1 px-4 py-2.5 rounded transition-colors ${applied ? 'bg-green-600 text-white' : dirty ? 'bg-cyan-500 hover:bg-cyan-600 text-white' : 'bg-cyan-900/60 text-cyan-400/50'}`}>
+              {applied ? '✓ Applied' : isEditing ? 'Apply' : 'Place Door'}
             </button>
             {isEditing && onDelete && (
               <button onClick={onDelete} className="px-4 py-2.5 bg-gray-700 hover:bg-red-900 text-red-400 rounded">

@@ -29,6 +29,8 @@ interface ColumnDialogProps {
   onDelete?: () => void;
 }
 
+import { useState, useLayoutEffect, useRef } from 'react';
+
 export function ColumnDialog({
   visible, wallLength, editingColumnId, editingColumn,
   columnWidth, columnDepth, columnInset, distanceType, distanceToCW, distanceToCCW,
@@ -38,6 +40,15 @@ export function ColumnDialog({
   onDistanceToCWChange, onDistanceToCCWChange, onValidationErrorChange,
   onSubmit, onCancel, onDelete,
 }: ColumnDialogProps) {
+  const origRef = useRef({ columnWidth, columnDepth, columnInset, distanceType, distanceToCW, distanceToCCW });
+  const [applied, setApplied] = useState(false);
+  useLayoutEffect(() => {
+    if (visible) { origRef.current = { columnWidth, columnDepth, columnInset, distanceType, distanceToCW, distanceToCCW }; setApplied(false); }
+  }, [visible]);
+  const dirty = columnWidth !== origRef.current.columnWidth || columnDepth !== origRef.current.columnDepth ||
+    columnInset !== origRef.current.columnInset || distanceType !== origRef.current.distanceType ||
+    distanceToCW !== origRef.current.distanceToCW || distanceToCCW !== origRef.current.distanceToCCW;
+  const handleApply = () => { setApplied(true); setTimeout(onSubmit, 400); };
   if (!visible) return null;
 
   const isEditing = !!editingColumnId;
@@ -139,8 +150,9 @@ export function ColumnDialog({
         {/* Action buttons -- visually separated from form */}
         <div className="border-t border-gray-600/50 mt-6 pt-4 space-y-3">
           <div className="flex gap-2">
-            <button onClick={onSubmit} className="flex-1 px-4 py-2.5 bg-cyan-500 text-white rounded hover:bg-cyan-600">
-              {isEditing ? 'Apply' : 'Place Column'}
+            <button onClick={handleApply}
+              className={`flex-1 px-4 py-2.5 rounded transition-colors ${applied ? 'bg-green-600 text-white' : dirty ? 'bg-cyan-500 hover:bg-cyan-600 text-white' : 'bg-cyan-900/60 text-cyan-400/50'}`}>
+              {applied ? '✓ Applied' : isEditing ? 'Apply' : 'Place Column'}
             </button>
             {isEditing && onDelete && (
               <button onClick={onDelete} className="px-4 py-2.5 bg-gray-700 hover:bg-red-900 text-red-400 rounded">

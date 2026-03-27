@@ -30,6 +30,8 @@ interface WindowDialogProps {
   onDelete?: () => void;
 }
 
+import { useState, useLayoutEffect, useRef } from 'react';
+
 export function WindowDialog({
   visible, wallLength, editingWindowId,
   panelCount, windowType, opening, hinge, width, height, setback, fromNodeA,
@@ -39,6 +41,16 @@ export function WindowDialog({
   onWidthChange, onSetbackChange, onFromNodeAChange, onValidationErrorChange,
   onSubmit, onCancel, onDelete,
 }: WindowDialogProps) {
+  const origRef = useRef({ panelCount, windowType, opening, hinge, width, height, setback, fromNodeA });
+  const [applied, setApplied] = useState(false);
+  useLayoutEffect(() => {
+    if (visible) { origRef.current = { panelCount, windowType, opening, hinge, width, height, setback, fromNodeA }; setApplied(false); }
+  }, [visible]);
+  const dirty = panelCount !== origRef.current.panelCount || windowType !== origRef.current.windowType ||
+    opening !== origRef.current.opening || hinge !== origRef.current.hinge ||
+    fromNodeA !== origRef.current.fromNodeA || width !== origRef.current.width ||
+    height !== origRef.current.height || setback !== origRef.current.setback;
+  const handleApply = () => { setApplied(true); setTimeout(onSubmit, 400); };
   if (!visible) return null;
 
   const isEditing = !!editingWindowId;
@@ -176,8 +188,9 @@ export function WindowDialog({
         {/* Action buttons -- visually separated from form */}
         <div className="border-t border-gray-600/50 mt-6 pt-4 space-y-3">
           <div className="flex gap-2">
-            <button onClick={onSubmit} className="flex-1 px-4 py-2.5 bg-cyan-500 text-white rounded hover:bg-cyan-600">
-              {isEditing ? 'Apply' : 'Place Window'}
+            <button onClick={handleApply}
+              className={`flex-1 px-4 py-2.5 rounded transition-colors ${applied ? 'bg-green-600 text-white' : dirty ? 'bg-cyan-500 hover:bg-cyan-600 text-white' : 'bg-cyan-900/60 text-cyan-400/50'}`}>
+              {applied ? '✓ Applied' : isEditing ? 'Apply' : 'Place Window'}
             </button>
             {isEditing && onDelete && (
               <button onClick={onDelete} className="px-4 py-2.5 bg-gray-700 hover:bg-red-900 text-red-400 rounded">

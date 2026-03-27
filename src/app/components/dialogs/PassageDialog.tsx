@@ -20,6 +20,8 @@ interface PassageDialogProps {
   onDelete?: () => void;
 }
 
+import { useState, useLayoutEffect, useRef } from 'react';
+
 export function PassageDialog({
   visible, wallLength, editingPassageId,
   width, offset, fromNodeA,
@@ -28,6 +30,14 @@ export function PassageDialog({
   onWidthChange, onOffsetChange, onFromNodeAChange, onValidationErrorChange,
   onSubmit, onCancel, onDelete,
 }: PassageDialogProps) {
+  const origRef = useRef({ width, offset, fromNodeA });
+  const [applied, setApplied] = useState(false);
+  useLayoutEffect(() => {
+    if (visible) { origRef.current = { width, offset, fromNodeA }; setApplied(false); }
+  }, [visible]);
+  const dirty = width !== origRef.current.width || offset !== origRef.current.offset ||
+    fromNodeA !== origRef.current.fromNodeA;
+  const handleApply = () => { setApplied(true); setTimeout(onSubmit, 400); };
   if (!visible) return null;
 
   const isEditing = !!editingPassageId;
@@ -88,8 +98,9 @@ export function PassageDialog({
         {/* Action buttons -- visually separated from form */}
         <div className="border-t border-gray-600/50 mt-6 pt-4 space-y-3">
           <div className="flex gap-2">
-            <button onClick={onSubmit} className="flex-1 px-4 py-2.5 bg-cyan-500 text-white rounded hover:bg-cyan-600">
-              {isEditing ? 'Apply' : 'Place Passage'}
+            <button onClick={handleApply}
+              className={`flex-1 px-4 py-2.5 rounded transition-colors ${applied ? 'bg-green-600 text-white' : dirty ? 'bg-cyan-500 hover:bg-cyan-600 text-white' : 'bg-cyan-900/60 text-cyan-400/50'}`}>
+              {applied ? '✓ Applied' : isEditing ? 'Apply' : 'Place Passage'}
             </button>
             {isEditing && onDelete && (
               <button onClick={onDelete} className="px-4 py-2.5 bg-gray-700 hover:bg-red-900 text-red-400 rounded">

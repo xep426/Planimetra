@@ -14,6 +14,8 @@ interface WallEditDialogProps {
   deleteDisabledReason?: string | null;
 }
 
+import { useState, useLayoutEffect, useRef } from 'react';
+
 export function WallEditDialog({
   visible,
   wallEditType, wallEditThickness, wallEditLength,
@@ -21,6 +23,15 @@ export function WallEditDialog({
   onSubmit, onCancel,
   onDelete, canDelete, deleteDisabledReason,
 }: WallEditDialogProps) {
+  const origRef = useRef({ wallEditType, wallEditThickness, wallEditLength });
+  const [applied, setApplied] = useState(false);
+  useLayoutEffect(() => {
+    if (visible) { origRef.current = { wallEditType, wallEditThickness, wallEditLength }; setApplied(false); }
+  }, [visible]);
+  const dirty = wallEditType !== origRef.current.wallEditType ||
+    wallEditThickness !== origRef.current.wallEditThickness ||
+    wallEditLength !== origRef.current.wallEditLength;
+  const handleApply = () => { setApplied(true); setTimeout(onSubmit, 400); };
   if (!visible) return null;
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
@@ -93,10 +104,10 @@ export function WallEditDialog({
         {/* Action buttons -- visually separated from form */}
         <div className="border-t border-gray-600/50 mt-6 pt-4 space-y-3">
           <div className="flex gap-2">
-            <button 
-              onClick={onSubmit} 
-              className="flex-1 px-4 py-2.5 bg-cyan-500 text-white rounded hover:bg-cyan-600">
-              Apply
+            <button
+              onClick={handleApply}
+              className={`flex-1 px-4 py-2.5 rounded transition-colors ${applied ? 'bg-green-600 text-white' : dirty ? 'bg-cyan-500 hover:bg-cyan-600 text-white' : 'bg-cyan-900/60 text-cyan-400/50'}`}>
+              {applied ? '✓ Applied' : 'Apply'}
             </button>
             {onDelete && (
               <button 

@@ -82,6 +82,10 @@ function WallEditor({ wall, nodes, walls, unconstrainedNodes, saveHistory, setVa
   const [length, setLength] = useState(wall.length.toFixed(3));
   const [error, setError] = useState<string | null>(null);
 
+  const dirty = type !== wall.type || thickness !== wall.thickness ||
+    Math.abs(parseFloat(length.replace(',', '.')) - wall.length) > 0.001;
+  const [applied, setApplied] = useState(false);
+
   useEffect(() => {
     setType(wall.type);
     setThickness(wall.thickness);
@@ -132,6 +136,7 @@ function WallEditor({ wall, nodes, walls, unconstrainedNodes, saveHistory, setVa
 
     setError(null);
     saveHistory(updatedNodes, updatedWalls);
+    setApplied(true); setTimeout(() => setApplied(false), 1200);
   };
 
   return (
@@ -159,7 +164,7 @@ function WallEditor({ wall, nodes, walls, unconstrainedNodes, saveHistory, setVa
       </div>
       {error && <p className="text-red-400 text-xs">{error}</p>}
       <div className="mt-3 pt-1 flex gap-2">
-        <button onClick={handleApply} className="flex-1 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white text-xs rounded">Apply</button>
+        <button onClick={handleApply} className={`flex-1 py-1.5 text-xs rounded transition-colors ${applied ? 'bg-green-600 text-white' : dirty ? 'bg-cyan-600 hover:bg-cyan-500 text-white' : 'bg-cyan-900/60 text-cyan-400/50'}`}>{applied ? '✓ Applied' : 'Apply'}</button>
         <button onClick={onDeleteWall} disabled={!canDeleteWall}
           className={`py-1.5 px-3 text-xs rounded ${canDeleteWall ? 'bg-gray-700 hover:bg-red-900 text-red-400' : 'bg-gray-700 text-gray-600 cursor-not-allowed'}`}
           title={canDeleteWall ? 'Delete this wall' : deleteDisabledReason || 'Cannot delete'}>Delete</button>
@@ -188,6 +193,13 @@ function WindowEditor({ win, wall, nodes, walls, windows, labels, interiorSign, 
   const [setback, setSetback] = useState(win.setback.toFixed(3));
   const [fromNodeA, setFromNodeA] = useState(win.fromNodeA);
 
+  const dirty = panelCount !== win.panelCount || wType !== win.type || opening !== win.opening ||
+    hinge !== win.hinge || fromNodeA !== win.fromNodeA ||
+    Math.abs(parseFloat(width.replace(',', '.')) - win.width) > 0.0001 ||
+    Math.abs(parseFloat(height.replace(',', '.')) - win.height) > 0.0001 ||
+    Math.abs(parseFloat(setback.replace(',', '.')) - win.setback) > 0.0001;
+  const [applied, setApplied] = useState(false);
+
   // Left = CCW node, Right = CW node
   const isLeftFromNodeA = labels.nodeALabel === 'CCW';
   const isLeftActive = fromNodeA === isLeftFromNodeA;
@@ -208,6 +220,7 @@ function WindowEditor({ win, wall, nodes, walls, windows, labels, interiorSign, 
       x.id === win.id ? { ...x, position, setback: sb, fromNodeA, panelCount, type: wType, opening, width: w, height: h, hinge } : x
     );
     saveHistory(nodes, walls, newWindows);
+    setApplied(true); setTimeout(() => setApplied(false), 1200);
   };
 
   const handleDelete = () => {
@@ -261,7 +274,7 @@ function WindowEditor({ win, wall, nodes, walls, windows, labels, interiorSign, 
       </div>
       <div><label className={labelCls}>Setback (m)</label><input type="number" inputMode="decimal" value={setback} onChange={e => setSetback(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') handleApply(); }} className={inputCls} /></div>
       <div className="mt-3 pt-1 flex gap-2">
-        <button onClick={handleApply} className="flex-1 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white text-xs rounded">Apply</button>
+        <button onClick={handleApply} className={`flex-1 py-1.5 text-xs rounded transition-colors ${applied ? 'bg-green-600 text-white' : dirty ? 'bg-cyan-600 hover:bg-cyan-500 text-white' : 'bg-cyan-900/60 text-cyan-400/50'}`}>{applied ? '✓ Applied' : 'Apply'}</button>
         <button onClick={handleDelete} className="py-1.5 px-3 bg-gray-700 hover:bg-red-900 text-red-400 text-xs rounded">Delete</button>
       </div>
     </div>
@@ -283,6 +296,12 @@ function DoorEditor({ door, wall, nodes, walls, windows, doors, labels, interior
   const [setback, setSetback] = useState(door.setback.toFixed(3));
   const [fromNodeA, setFromNodeA] = useState(door.fromNodeA);
 
+  const dirty = opening !== door.opening || hinge !== door.hinge || fromNodeA !== door.fromNodeA ||
+    Math.abs(parseFloat(width.replace(',', '.')) - door.width) > 0.0001 ||
+    Math.abs(parseFloat(height.replace(',', '.')) - door.height) > 0.0001 ||
+    Math.abs(parseFloat(setback.replace(',', '.')) - door.setback) > 0.0001;
+  const [applied, setApplied] = useState(false);
+
   // Left = CCW node, Right = CW node
   const isLeftFromNodeA = labels.nodeALabel === 'CCW';
   const isLeftActive = fromNodeA === isLeftFromNodeA;
@@ -303,6 +322,7 @@ function DoorEditor({ door, wall, nodes, walls, windows, doors, labels, interior
       x.id === door.id ? { ...x, position, setback: sb, fromNodeA, opening, width: w, height: h, hinge } : x
     );
     saveHistory(nodes, walls, windows, newDoors);
+    setApplied(true); setTimeout(() => setApplied(false), 1200);
   };
 
   const handleDelete = () => {
@@ -339,7 +359,7 @@ function DoorEditor({ door, wall, nodes, walls, windows, doors, labels, interior
       </div>
       <div><label className={labelCls}>Setback (m)</label><input type="number" inputMode="decimal" value={setback} onChange={e => setSetback(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') handleApply(); }} className={inputCls} /></div>
       <div className="mt-3 pt-1 flex gap-2">
-        <button onClick={handleApply} className="flex-1 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white text-xs rounded">Apply</button>
+        <button onClick={handleApply} className={`flex-1 py-1.5 text-xs rounded transition-colors ${applied ? 'bg-green-600 text-white' : dirty ? 'bg-cyan-600 hover:bg-cyan-500 text-white' : 'bg-cyan-900/60 text-cyan-400/50'}`}>{applied ? '✓ Applied' : 'Apply'}</button>
         <button onClick={handleDelete} className="py-1.5 px-3 bg-gray-700 hover:bg-red-900 text-red-400 text-xs rounded">Delete</button>
       </div>
     </div>
@@ -357,6 +377,11 @@ function PassageEditor({ passage, wall, nodes, walls, windows, doors, passages, 
   const [width, setWidth] = useState(passage.width.toString());
   const [offset, setOffset] = useState(passage.offset.toFixed(3));
   const [fromNodeA, setFromNodeA] = useState(passage.fromNodeA);
+
+  const dirty = fromNodeA !== passage.fromNodeA ||
+    Math.abs(parseFloat(width.replace(',', '.')) - passage.width) > 0.0001 ||
+    Math.abs(parseFloat(offset.replace(',', '.')) - passage.offset) > 0.0001;
+  const [applied, setApplied] = useState(false);
 
   // Left = CCW node, Right = CW node
   const isLeftFromNodeA = labels.nodeALabel === 'CCW';
@@ -376,6 +401,7 @@ function PassageEditor({ passage, wall, nodes, walls, windows, doors, passages, 
       x.id === passage.id ? { ...x, position, offset: o, fromNodeA, width: w } : x
     );
     saveHistory(nodes, walls, windows, doors, newPassages);
+    setApplied(true); setTimeout(() => setApplied(false), 1200);
   };
 
   const handleDelete = () => {
@@ -395,7 +421,7 @@ function PassageEditor({ passage, wall, nodes, walls, windows, doors, passages, 
       </div>
       <div><label className={labelCls}>Setback (m)</label><input type="number" inputMode="decimal" value={offset} onChange={e => setOffset(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') handleApply(); }} className={inputCls} /></div>
       <div className="mt-3 pt-1 flex gap-2">
-        <button onClick={handleApply} className="flex-1 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white text-xs rounded">Apply</button>
+        <button onClick={handleApply} className={`flex-1 py-1.5 text-xs rounded transition-colors ${applied ? 'bg-green-600 text-white' : dirty ? 'bg-cyan-600 hover:bg-cyan-500 text-white' : 'bg-cyan-900/60 text-cyan-400/50'}`}>{applied ? '✓ Applied' : 'Apply'}</button>
         <button onClick={handleDelete} className="py-1.5 px-3 bg-gray-700 hover:bg-red-900 text-red-400 text-xs rounded">Delete</button>
       </div>
     </div>
@@ -424,6 +450,13 @@ function ColumnEditor({ col, wall, nodes, walls, windows, doors, passages, colum
   const [distCW, setDistCW] = useState(col.distanceToCW.toFixed(3));
   const [distCCW, setDistCCW] = useState(col.distanceToCCW.toFixed(3));
 
+  const dirty = Math.abs(parseFloat(colWidth.replace(',', '.')) - col.width) > 0.0001 ||
+    Math.abs(parseFloat(depth.replace(',', '.')) - col.depth) > 0.0001 ||
+    Math.abs(parseFloat(inset.replace(',', '.')) - (col.inset ?? 0)) > 0.0001 ||
+    Math.abs(parseFloat(distCW.replace(',', '.')) - col.distanceToCW) > 0.0001 ||
+    Math.abs(parseFloat(distCCW.replace(',', '.')) - col.distanceToCCW) > 0.0001;
+  const [applied, setApplied] = useState(false);
+
   useEffect(() => {
     setColWidth(col.width.toString()); setDepth(col.depth.toString());
     setInset((col.inset ?? 0).toString()); setDistCW(col.distanceToCW.toFixed(3));
@@ -447,6 +480,7 @@ function ColumnEditor({ col, wall, nodes, walls, windows, doors, passages, colum
       } : x
     );
     saveHistory(nodes, walls, windows, doors, passages, newColumns);
+    setApplied(true); setTimeout(() => setApplied(false), 1200);
   };
 
   const handleDelete = () => {
@@ -494,7 +528,7 @@ function ColumnEditor({ col, wall, nodes, walls, windows, doors, passages, colum
           className={inputCls} />
       </div>
       <div className="mt-3 pt-1 flex gap-2">
-        <button onClick={handleApply} className="flex-1 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white text-xs rounded">Apply</button>
+        <button onClick={handleApply} className={`flex-1 py-1.5 text-xs rounded transition-colors ${applied ? 'bg-green-600 text-white' : dirty ? 'bg-cyan-600 hover:bg-cyan-500 text-white' : 'bg-cyan-900/60 text-cyan-400/50'}`}>{applied ? '✓ Applied' : 'Apply'}</button>
         <button onClick={handleDelete} className="py-1.5 px-3 bg-gray-700 hover:bg-red-900 text-red-400 text-xs rounded">Delete</button>
       </div>
       <div className="mt-3 pt-3 border-t border-gray-600/50">
