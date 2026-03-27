@@ -338,6 +338,13 @@ export function Canvas2D({ guiReady = true, onNewProject }: { guiReady?: boolean
 
   useEffect(() => { setOpenLoopEndpoints(detectOpenLoop()); }, [nodes, walls]);
 
+  // When undo removes the closing wall, the loop is no longer closed — switch back to wall mode.
+  useEffect(() => {
+    if (!isLoopClosedUtil(walls) && selectedTool !== 'wall') {
+      setSelectedTool('wall');
+    }
+  }, [walls]);
+
   const isLoopClosed = () => isLoopClosedUtil(walls);
 
   // ---- Calculate node direction labels --------------------------------------
