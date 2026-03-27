@@ -57,9 +57,9 @@ export function findLabelPlacement(opts: LabelPlacementOpts): PlacementResult {
 
   const off = naturalOffset / scale;
 
-  // Steps proportional to label size — zoom-independent
-  const perpStep = labelHeight * 1.1;
-  const alongStep = labelWidth * 0.6;
+  // Steps proportional to label size — small increments for tight packing
+  const perpStep = labelHeight * 0.3;
+  const alongStep = labelWidth * 0.4;
 
   const sides = [preferredSide, -preferredSide];
 
@@ -73,7 +73,7 @@ export function findLabelPlacement(opts: LabelPlacementOpts): PlacementResult {
     }
 
     // Expand outward perpendicularly, trying along-wall offsets at each step
-    for (let p = 1; p <= 12; p++) {
+    for (let p = 1; p <= 40; p++) {
       const px = baseX + perpX * side * perpStep * p;
       const py = baseY + perpY * side * perpStep * p;
 
@@ -82,7 +82,7 @@ export function findLabelPlacement(opts: LabelPlacementOpts): PlacementResult {
       }
 
       for (const along of [1, -1]) {
-        for (let a = 1; a <= 6; a++) {
+        for (let a = 1; a <= 8; a++) {
           const cx = px + dirX * along * alongStep * a;
           const cy = py + dirY * along * alongStep * a;
           if (!hasOverlap(cx, cy, labelWidth, labelHeight, existingBounds, cosR, sinR)) {
@@ -94,7 +94,7 @@ export function findLabelPlacement(opts: LabelPlacementOpts): PlacementResult {
 
     // Pure along-wall sweep at natural offset
     for (const along of [1, -1]) {
-      for (let a = 1; a <= 12; a++) {
+      for (let a = 1; a <= 20; a++) {
         const cx = baseX + dirX * along * alongStep * a;
         const cy = baseY + dirY * along * alongStep * a;
         if (!hasOverlap(cx, cy, labelWidth, labelHeight, existingBounds, cosR, sinR)) {
