@@ -29,7 +29,7 @@ interface ColumnDialogProps {
   onDelete?: () => void;
 }
 
-import { useState, useLayoutEffect, useRef } from 'react';
+import { useState, useLayoutEffect } from 'react';
 
 export function ColumnDialog({
   visible, wallLength, editingColumnId, editingColumn,
@@ -40,14 +40,14 @@ export function ColumnDialog({
   onDistanceToCWChange, onDistanceToCCWChange, onValidationErrorChange,
   onSubmit, onCancel, onDelete,
 }: ColumnDialogProps) {
-  const origRef = useRef({ columnWidth, columnDepth, columnInset, distanceType, distanceToCW, distanceToCCW });
+  const [orig, setOrig] = useState({ columnWidth, columnDepth, columnInset, distanceType, distanceToCW, distanceToCCW });
   const [applied, setApplied] = useState(false);
   useLayoutEffect(() => {
-    if (visible) { origRef.current = { columnWidth, columnDepth, columnInset, distanceType, distanceToCW, distanceToCCW }; setApplied(false); }
+    if (visible) { setOrig({ columnWidth, columnDepth, columnInset, distanceType, distanceToCW, distanceToCCW }); setApplied(false); }
   }, [visible]);
-  const dirty = columnWidth !== origRef.current.columnWidth || columnDepth !== origRef.current.columnDepth ||
-    columnInset !== origRef.current.columnInset || distanceType !== origRef.current.distanceType ||
-    distanceToCW !== origRef.current.distanceToCW || distanceToCCW !== origRef.current.distanceToCCW;
+  const dirty = columnWidth !== orig.columnWidth || columnDepth !== orig.columnDepth ||
+    columnInset !== orig.columnInset || distanceType !== orig.distanceType ||
+    distanceToCW !== orig.distanceToCW || distanceToCCW !== orig.distanceToCCW;
   const handleApply = () => { setApplied(true); setTimeout(onSubmit, 400); };
   if (!visible) return null;
 

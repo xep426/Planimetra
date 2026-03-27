@@ -26,7 +26,7 @@ interface DoorDialogProps {
   onDelete?: () => void;
 }
 
-import { useState, useLayoutEffect, useRef } from 'react';
+import { useState, useLayoutEffect } from 'react';
 
 export function DoorDialog({
   visible, wallLength, editingDoorId,
@@ -37,14 +37,14 @@ export function DoorDialog({
   onSetbackChange, onFromNodeAChange, onValidationErrorChange,
   onSubmit, onCancel, onDelete,
 }: DoorDialogProps) {
-  const origRef = useRef({ opening, hinge, width, height, setback, fromNodeA });
+  const [orig, setOrig] = useState({ opening, hinge, width, height, setback, fromNodeA });
   const [applied, setApplied] = useState(false);
   useLayoutEffect(() => {
-    if (visible) { origRef.current = { opening, hinge, width, height, setback, fromNodeA }; setApplied(false); }
+    if (visible) { setOrig({ opening, hinge, width, height, setback, fromNodeA }); setApplied(false); }
   }, [visible]);
-  const dirty = opening !== origRef.current.opening || hinge !== origRef.current.hinge ||
-    fromNodeA !== origRef.current.fromNodeA || width !== origRef.current.width ||
-    height !== origRef.current.height || setback !== origRef.current.setback;
+  const dirty = opening !== orig.opening || hinge !== orig.hinge ||
+    fromNodeA !== orig.fromNodeA || width !== orig.width ||
+    height !== orig.height || setback !== orig.setback;
   const handleApply = () => { setApplied(true); setTimeout(onSubmit, 400); };
   if (!visible) return null;
 

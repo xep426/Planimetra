@@ -14,7 +14,7 @@ interface WallEditDialogProps {
   deleteDisabledReason?: string | null;
 }
 
-import { useState, useLayoutEffect, useRef } from 'react';
+import { useState, useLayoutEffect } from 'react';
 
 export function WallEditDialog({
   visible,
@@ -23,14 +23,14 @@ export function WallEditDialog({
   onSubmit, onCancel,
   onDelete, canDelete, deleteDisabledReason,
 }: WallEditDialogProps) {
-  const origRef = useRef({ wallEditType, wallEditThickness, wallEditLength });
+  const [orig, setOrig] = useState({ wallEditType, wallEditThickness, wallEditLength });
   const [applied, setApplied] = useState(false);
   useLayoutEffect(() => {
-    if (visible) { origRef.current = { wallEditType, wallEditThickness, wallEditLength }; setApplied(false); }
+    if (visible) { setOrig({ wallEditType, wallEditThickness, wallEditLength }); setApplied(false); }
   }, [visible]);
-  const dirty = wallEditType !== origRef.current.wallEditType ||
-    wallEditThickness !== origRef.current.wallEditThickness ||
-    wallEditLength !== origRef.current.wallEditLength;
+  const dirty = wallEditType !== orig.wallEditType ||
+    wallEditThickness !== orig.wallEditThickness ||
+    wallEditLength !== orig.wallEditLength;
   const handleApply = () => { setApplied(true); setTimeout(onSubmit, 400); };
   if (!visible) return null;
   return (

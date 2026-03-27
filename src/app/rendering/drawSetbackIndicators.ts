@@ -7,7 +7,7 @@ import type { DrawContext } from './types';
 export function drawSetbackIndicators(ctx: CanvasRenderingContext2D, dc: DrawContext) {
   const {
     nodes, walls, windows, doors, passages, columns,
-    transform, selectedWindowId, selectedDoorId, selectedPassageId, selectedColumnId,
+    transform, selectedTool, selectedWindowId, selectedDoorId, selectedPassageId, selectedColumnId,
     wallInteriorSign,
   } = dc;
 
@@ -50,7 +50,7 @@ export function drawSetbackIndicators(ctx: CanvasRenderingContext2D, dc: DrawCon
   };
 
   // Window setback
-  if (selectedWindowId) {
+  if (selectedTool === 'window' && selectedWindowId) {
     const win = windows.find(w => w.id === selectedWindowId);
     if (win) {
       const wall = walls.find(w => w.id === win.wallId);
@@ -67,7 +67,7 @@ export function drawSetbackIndicators(ctx: CanvasRenderingContext2D, dc: DrawCon
   }
 
   // Door setback
-  if (selectedDoorId) {
+  if (selectedTool === 'door' && selectedDoorId) {
     const door = doors.find(d => d.id === selectedDoorId);
     if (door) {
       const wall = walls.find(w => w.id === door.wallId);
@@ -84,7 +84,7 @@ export function drawSetbackIndicators(ctx: CanvasRenderingContext2D, dc: DrawCon
   }
 
   // Passage setback
-  if (selectedPassageId) {
+  if (selectedTool === 'passage' && selectedPassageId) {
     const passage = passages.find(p => p.id === selectedPassageId);
     if (passage) {
       const wall = walls.find(w => w.id === passage.wallId);
@@ -101,7 +101,7 @@ export function drawSetbackIndicators(ctx: CanvasRenderingContext2D, dc: DrawCon
   }
 
   // Column setback
-  if (selectedColumnId) {
+  if (selectedTool === 'column' && selectedColumnId) {
     const column = columns.find(c => c.id === selectedColumnId);
     if (column) {
       const wall = walls.find(w => w.id === column.wallId);

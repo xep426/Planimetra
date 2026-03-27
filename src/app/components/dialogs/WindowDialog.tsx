@@ -30,7 +30,7 @@ interface WindowDialogProps {
   onDelete?: () => void;
 }
 
-import { useState, useLayoutEffect, useRef } from 'react';
+import { useState, useLayoutEffect } from 'react';
 
 export function WindowDialog({
   visible, wallLength, editingWindowId,
@@ -41,15 +41,15 @@ export function WindowDialog({
   onWidthChange, onSetbackChange, onFromNodeAChange, onValidationErrorChange,
   onSubmit, onCancel, onDelete,
 }: WindowDialogProps) {
-  const origRef = useRef({ panelCount, windowType, opening, hinge, width, height, setback, fromNodeA });
+  const [orig, setOrig] = useState({ panelCount, windowType, opening, hinge, width, height, setback, fromNodeA });
   const [applied, setApplied] = useState(false);
   useLayoutEffect(() => {
-    if (visible) { origRef.current = { panelCount, windowType, opening, hinge, width, height, setback, fromNodeA }; setApplied(false); }
+    if (visible) { setOrig({ panelCount, windowType, opening, hinge, width, height, setback, fromNodeA }); setApplied(false); }
   }, [visible]);
-  const dirty = panelCount !== origRef.current.panelCount || windowType !== origRef.current.windowType ||
-    opening !== origRef.current.opening || hinge !== origRef.current.hinge ||
-    fromNodeA !== origRef.current.fromNodeA || width !== origRef.current.width ||
-    height !== origRef.current.height || setback !== origRef.current.setback;
+  const dirty = panelCount !== orig.panelCount || windowType !== orig.windowType ||
+    opening !== orig.opening || hinge !== orig.hinge ||
+    fromNodeA !== orig.fromNodeA || width !== orig.width ||
+    height !== orig.height || setback !== orig.setback;
   const handleApply = () => { setApplied(true); setTimeout(onSubmit, 400); };
   if (!visible) return null;
 

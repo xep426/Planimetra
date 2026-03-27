@@ -20,7 +20,7 @@ interface PassageDialogProps {
   onDelete?: () => void;
 }
 
-import { useState, useLayoutEffect, useRef } from 'react';
+import { useState, useLayoutEffect } from 'react';
 
 export function PassageDialog({
   visible, wallLength, editingPassageId,
@@ -30,13 +30,12 @@ export function PassageDialog({
   onWidthChange, onOffsetChange, onFromNodeAChange, onValidationErrorChange,
   onSubmit, onCancel, onDelete,
 }: PassageDialogProps) {
-  const origRef = useRef({ width, offset, fromNodeA });
+  const [orig, setOrig] = useState({ width, offset, fromNodeA });
   const [applied, setApplied] = useState(false);
   useLayoutEffect(() => {
-    if (visible) { origRef.current = { width, offset, fromNodeA }; setApplied(false); }
+    if (visible) { setOrig({ width, offset, fromNodeA }); setApplied(false); }
   }, [visible]);
-  const dirty = width !== origRef.current.width || offset !== origRef.current.offset ||
-    fromNodeA !== origRef.current.fromNodeA;
+  const dirty = width !== orig.width || offset !== orig.offset || fromNodeA !== orig.fromNodeA;
   const handleApply = () => { setApplied(true); setTimeout(onSubmit, 400); };
   if (!visible) return null;
 
