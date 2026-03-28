@@ -51,7 +51,7 @@ const btnToggle = (active: boolean) =>
   `flex-1 px-2 py-1.5 rounded text-xs transition-colors ${active ? 'bg-gray-500 text-white' : 'bg-gray-700 text-gray-400 hover:bg-gray-600'}`;
 
 /** Move nodeB along the existing wall direction to achieve the new length */
-function moveNodeBAlongWall(nodes: Node[], wall: Wall, newLengthM: number): Node[] {
+function moveNodeBAlongWall(nodes: Node[], walls: Wall[], wall: Wall, newLengthM: number): Node[] {
   const nA = nodes.find(n => n.id === wall.nodeA);
   const nB = nodes.find(n => n.id === wall.nodeB);
   if (!nA || !nB) return nodes;
@@ -59,11 +59,27 @@ function moveNodeBAlongWall(nodes: Node[], wall: Wall, newLengthM: number): Node
   const dy = nB.y - nA.y;
   const currentLen = Math.hypot(dx, dy);
   if (currentLen < 0.001) return nodes;
+  const newLenCm = newLengthM * 100;
   const dirX = dx / currentLen;
   const dirY = dy / currentLen;
-  const newLenCm = newLengthM * 100;
+  const deltaX = dirX * (newLenCm - currentLen);
+  const deltaY = dirY * (newLenCm - currentLen);
+  // BFS from nodeB (excluding nodeA) to find all downstream nodes
+  const downstream = new Set<string>();
+  const queue = [wall.nodeB];
+  while (queue.length > 0) {
+    const cur = queue.shift()!;
+    if (downstream.has(cur)) continue;
+    downstream.add(cur);
+    for (const w of walls) {
+      if (w.id === wall.id) continue;
+      if (w.nodeA === cur && !downstream.has(w.nodeB)) queue.push(w.nodeB);
+      if (w.nodeB === cur && !downstream.has(w.nodeA)) queue.push(w.nodeA);
+    }
+  }
+  downstream.delete(wall.nodeA);
   return nodes.map(n =>
-    n.id === wall.nodeB ? { ...n, x: nA.x + dirX * newLenCm, y: nA.y + dirY * newLenCm } : n
+    downstream.has(n.id) ? { ...n, x: n.x + deltaX, y: n.y + deltaY } : n
   );
 }
 
@@ -121,16 +137,23 @@ function WallEditor({ wall, nodes, walls, unconstrainedNodes, saveHistory, setVa
 
           if (solvedNodes) {
             updatedNodes = solvedNodes;
+            // Sync wall stored lengths to actual node distances after solver moves nodes
+            const nodeMap = new Map(solvedNodes.map(n => [n.id, n]));
+            updatedWalls = updatedWalls.map(w => {
+              const nA = nodeMap.get(w.nodeA);
+              const nB = nodeMap.get(w.nodeB);
+              if (!nA || !nB) return w;
+              return { ...w, length: Math.hypot(nB.x - nA.x, nB.y - nA.y) / 100 };
+            });
           } else {
             setError('Cannot re-close the loop with that wall length.');
             return;
           }
         } else {
-          // Fallback
-          updatedNodes = moveNodeBAlongWall(nodes, wall, newLengthM);
+          updatedNodes = moveNodeBAlongWall(nodes, walls, wall, newLengthM);
         }
       } else {
-        updatedNodes = moveNodeBAlongWall(nodes, wall, newLengthM);
+        updatedNodes = moveNodeBAlongWall(nodes, walls, wall, newLengthM);
       }
     }
 
