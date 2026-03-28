@@ -1,12 +1,15 @@
-# Planimetra
-
-Yet another 2D floor-plan sketcher -- except it's the one I wanted to use, so I built it (and I needed DXF export functionality).
-
 ![Planimetra desktop screenshot](public/screenshot_desktop.jpg)
 
-## Live Demo
+## Status: Alpha
 
-- https://planimetra.com
+Planimetra is in alpha. It is largely feature-complete for its original purpose -- quickly sketching a single room with accurate wall lengths, openings, and structural elements, and exporting the result as DXF. The core workflow is stable and usable.
+
+What "alpha" means here: rough edges remain, there are no automated tests, and the data model may change between versions. Use it, break it, report issues.
+
+## Platforms
+
+- **Web** - [planimetra.com](https://planimetra.com)
+- **Android** - coming soon *(Google Play link placeholder)*
 
 ## Features
 
@@ -21,11 +24,19 @@ Yet another 2D floor-plan sketcher -- except it's the one I wanted to use, so I 
 - DXF export
 - PWA offline support
 
+## Possible Future Directions
+
+These are not commitments, just areas worth exploring:
+
+- **Proper floor plan export** - rendered PDF or image output suitable for sharing or printing, beyond the current DXF
+- **Furniture layer** - place and arrange furniture objects within a room sketch
+- **Project mode / room stitching** - combine multiple room sketches into a single read-only overview of a full floor plan; individual rooms would still be edited separately
+
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js 18+ or pnpm
+- Node.js 18+
 - npm or pnpm package manager
 
 ### Installation
@@ -67,10 +78,7 @@ This project is optimized for deployment on Vercel. Simply connect your GitHub r
 - **TypeScript** - Type-safe development
 - **Tailwind CSS** - Utility-first styling
 - **Radix UI** - Accessible component library
-- **React DnD** - Drag and drop functionality
-- **Recharts** - Data visualization
 
 ## License
 
 See [ATTRIBUTIONS.md](ATTRIBUTIONS.md) for license information and attributions.
-  
