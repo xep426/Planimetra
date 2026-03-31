@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import type { Node, Wall, WindowObj, DoorObj, PassageObj, ColumnObj, LayerType } from '../../types';
 import { isLoopClosed } from '../../utils/wallGeometry';
 import { findChain, solveClosedLoop } from '../../utils/solver';
+import { useIsDark } from '../../contexts/ThemeContext';
 
 interface EditorSectionProps {
   selectedTool: LayerType;
@@ -44,11 +45,13 @@ interface EditorSectionProps {
   deleteWallDisabledReason: string | null;
 }
 
-// Shared input style
-const inputCls = 'w-full px-2 py-1.5 bg-gray-800 text-white rounded border border-gray-600 text-sm focus:outline-none focus:border-cyan-500';
-const labelCls = 'text-gray-400 text-xs block mb-1';
-const btnToggle = (active: boolean) =>
-  `flex-1 px-2 py-1.5 rounded text-xs transition-colors ${active ? 'bg-gray-500 text-white' : 'bg-gray-700 text-gray-400 hover:bg-gray-600'}`;
+// Shared input style (isDark-aware)
+const inputCls = (isDark: boolean) =>
+  `w-full px-2 py-1.5 rounded border text-sm focus:outline-none focus:border-cyan-500 ${isDark ? 'bg-gray-800 text-white border-gray-600' : 'bg-gray-50 text-gray-900 border-gray-300'}`;
+const labelCls = (isDark: boolean) =>
+  `${isDark ? 'text-gray-400' : 'text-gray-600'} text-xs block mb-1`;
+const btnToggle = (active: boolean, isDark: boolean) =>
+  `flex-1 px-2 py-1.5 rounded text-xs transition-colors ${active ? 'bg-gray-500 text-white' : isDark ? 'bg-gray-700 text-gray-400 hover:bg-gray-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`;
 
 /** Move nodeB along the existing wall direction to achieve the new length */
 function moveNodeBAlongWall(nodes: Node[], walls: Wall[], wall: Wall, newLengthM: number): Node[] {
@@ -93,6 +96,7 @@ function WallEditor({ wall, nodes, walls, unconstrainedNodes, saveHistory, setVa
   canDeleteWall: boolean;
   deleteDisabledReason: string | null;
 }) {
+  const isDark = useIsDark();
   const [type, setType] = useState(wall.type);
   const [thickness, setThickness] = useState(wall.thickness);
   const [length, setLength] = useState(wall.length.toFixed(3));
@@ -165,35 +169,35 @@ function WallEditor({ wall, nodes, walls, unconstrainedNodes, saveHistory, setVa
   return (
     <div className="space-y-3">
       <div>
-        <label className={labelCls}>Length (m)</label>
+        <label className={labelCls(isDark)}>Length (m)</label>
         <input type="text" inputMode="decimal" value={length} onChange={e => { setLength(e.target.value); setError(null); }}
           onKeyDown={e => { if (e.key === 'Enter') handleApply(); }}
-          className={inputCls} />
+          className={inputCls(isDark)} />
       </div>
       <div>
-        <label className={labelCls}>Type</label>
+        <label className={labelCls(isDark)}>Type</label>
         <div className="flex gap-1">
-          <button onClick={() => setType('inner')} className={btnToggle(type === 'inner')}>Interior</button>
-          <button onClick={() => setType('external')} className={btnToggle(type === 'external')}>Exterior</button>
+          <button onClick={() => setType('inner')} className={btnToggle(type === 'inner', isDark)}>Interior</button>
+          <button onClick={() => setType('external')} className={btnToggle(type === 'external', isDark)}>Exterior</button>
         </div>
       </div>
       <div>
-        <label className={labelCls}>Thickness (cm)</label>
+        <label className={labelCls(isDark)}>Thickness (cm)</label>
         <div className="grid grid-cols-3 gap-1">
           {[10, 15, 20, 25, 30, 40].map(t => (
-            <button key={t} onClick={() => setThickness(t)} className={btnToggle(thickness === t)}>{t}</button>
+            <button key={t} onClick={() => setThickness(t)} className={btnToggle(thickness === t, isDark)}>{t}</button>
           ))}
         </div>
       </div>
       {error && <p className="text-red-400 text-xs">{error}</p>}
       <div className="mt-3 pt-1 flex gap-2">
-        <button onClick={handleApply} disabled={!dirty} className={`flex-1 py-1.5 text-xs rounded transition-colors ${applied ? 'bg-green-600 text-white' : dirty ? 'bg-cyan-600 hover:bg-cyan-500 text-white' : 'bg-cyan-900/60 text-cyan-400/50 cursor-not-allowed'}`}>{applied ? '✓ Applied' : 'Apply'}</button>
+        <button onClick={handleApply} disabled={!dirty} className={`flex-1 py-1.5 text-xs rounded transition-colors ${applied ? 'bg-green-600 text-white' : dirty ? 'bg-cyan-600 hover:bg-cyan-500 text-white' : isDark ? 'bg-cyan-900/60 text-cyan-400/50 cursor-not-allowed' : 'bg-gray-200 text-gray-500 cursor-not-allowed'}`}>{applied ? '✓ Applied' : 'Apply'}</button>
         <button onClick={onDeleteWall} disabled={!canDeleteWall}
-          className={`py-1.5 px-3 text-xs rounded ${canDeleteWall ? 'bg-gray-700 hover:bg-red-900 text-red-400' : 'bg-gray-700 text-gray-600 cursor-not-allowed'}`}
+          className={`py-1.5 px-3 text-xs rounded ${canDeleteWall ? isDark ? 'bg-gray-700 hover:bg-red-900 text-red-400' : 'bg-gray-100 hover:bg-red-100 text-red-600' : isDark ? 'bg-gray-700 text-gray-600 cursor-not-allowed' : 'bg-gray-100 text-gray-300 cursor-not-allowed'}`}
           title={canDeleteWall ? 'Delete this wall' : deleteDisabledReason || 'Cannot delete'}>Delete</button>
       </div>
       {!canDeleteWall && deleteDisabledReason && (
-        <p className="text-gray-500 text-[10px] mt-1 italic">{deleteDisabledReason}</p>
+        <p className={`${isDark ? 'text-gray-500' : 'text-gray-400'} text-[10px] mt-1 italic`}>{deleteDisabledReason}</p>
       )}
     </div>
   );
@@ -207,6 +211,7 @@ function WindowEditor({ win, wall, nodes, walls, windows, labels, interiorSign, 
   saveHistory: (n: Node[], w: Wall[], wins?: WindowObj[]) => void;
   onDone: () => void;
 }) {
+  const isDark = useIsDark();
   const [panelCount, setPanelCount] = useState(win.panelCount);
   const [wType, setWType] = useState(win.type);
   const [opening, setOpening] = useState(win.opening);
@@ -254,51 +259,51 @@ function WindowEditor({ win, wall, nodes, walls, windows, labels, interiorSign, 
   return (
     <div className="space-y-2.5">
       <div>
-        <label className={labelCls}>Panel Count</label>
+        <label className={labelCls(isDark)}>Panel Count</label>
         <div className="flex gap-1">
-          <button onClick={() => setPanelCount('single')} className={btnToggle(panelCount === 'single')}>Single</button>
-          <button onClick={() => setPanelCount('double')} className={btnToggle(panelCount === 'double')}>Double</button>
+          <button onClick={() => setPanelCount('single')} className={btnToggle(panelCount === 'single', isDark)}>Single</button>
+          <button onClick={() => setPanelCount('double')} className={btnToggle(panelCount === 'double', isDark)}>Double</button>
         </div>
       </div>
       <div>
-        <label className={labelCls}>Type</label>
+        <label className={labelCls(isDark)}>Type</label>
         <div className="flex gap-1">
-          <button onClick={() => { setWType('standard'); setHeight('1.4'); }} className={btnToggle(wType === 'standard')}>Standard</button>
-          <button onClick={() => { setWType('floor-to-ceiling'); setHeight('2.4'); }} className={btnToggle(wType === 'floor-to-ceiling')}>Floor-Ceil</button>
+          <button onClick={() => { setWType('standard'); setHeight('1.4'); }} className={btnToggle(wType === 'standard', isDark)}>Standard</button>
+          <button onClick={() => { setWType('floor-to-ceiling'); setHeight('2.4'); }} className={btnToggle(wType === 'floor-to-ceiling', isDark)}>Floor-Ceil</button>
         </div>
       </div>
       <div>
-        <label className={labelCls}>Opening</label>
+        <label className={labelCls(isDark)}>Opening</label>
         <div className="flex gap-1">
           {(['fixed', 'inward', 'outward'] as const).map(o => (
-            <button key={o} onClick={() => setOpening(o)} className={btnToggle(opening === o)}>{o[0].toUpperCase() + o.slice(1)}</button>
+            <button key={o} onClick={() => setOpening(o)} className={btnToggle(opening === o, isDark)}>{o[0].toUpperCase() + o.slice(1)}</button>
           ))}
         </div>
       </div>
       {panelCount === 'single' && opening !== 'fixed' && (
         <div>
-          <label className={labelCls}>Hinge</label>
+          <label className={labelCls(isDark)}>Hinge</label>
           <div className="flex gap-1">
-            <button onClick={() => setHinge('left')} className={btnToggle(hinge === 'left')}>Left</button>
-            <button onClick={() => setHinge('right')} className={btnToggle(hinge === 'right')}>Right</button>
+            <button onClick={() => setHinge('left')} className={btnToggle(hinge === 'left', isDark)}>Left</button>
+            <button onClick={() => setHinge('right')} className={btnToggle(hinge === 'right', isDark)}>Right</button>
           </div>
         </div>
       )}
       <div className="grid grid-cols-2 gap-2">
-        <div><label className={labelCls}>Width (m)</label><input type="number" inputMode="decimal" value={width} onChange={e => setWidth(e.target.value)} className={inputCls} /></div>
-        <div><label className={labelCls}>Height (m)</label><input type="number" inputMode="decimal" value={height} onChange={e => setHeight(e.target.value)} className={inputCls} /></div>
+        <div><label className={labelCls(isDark)}>Width (m)</label><input type="number" inputMode="decimal" value={width} onChange={e => setWidth(e.target.value)} className={inputCls(isDark)} /></div>
+        <div><label className={labelCls(isDark)}>Height (m)</label><input type="number" inputMode="decimal" value={height} onChange={e => setHeight(e.target.value)} className={inputCls(isDark)} /></div>
       </div>
       <div>
-        <label className={labelCls}>Setback Reference</label>
+        <label className={labelCls(isDark)}>Setback Reference</label>
         <div className="flex gap-1">
-          <button onClick={() => setFromNodeA(isLeftFromNodeA)} className={btnToggle(isLeftActive)}>Left</button>
-          <button onClick={() => setFromNodeA(!isLeftFromNodeA)} className={btnToggle(!isLeftActive)}>Right</button>
+          <button onClick={() => setFromNodeA(isLeftFromNodeA)} className={btnToggle(isLeftActive, isDark)}>Left</button>
+          <button onClick={() => setFromNodeA(!isLeftFromNodeA)} className={btnToggle(!isLeftActive, isDark)}>Right</button>
         </div>
       </div>
-      <div><label className={labelCls}>Setback (m)</label><input type="number" inputMode="decimal" value={setback} onChange={e => setSetback(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') handleApply(); }} className={inputCls} /></div>
+      <div><label className={labelCls(isDark)}>Setback (m)</label><input type="number" inputMode="decimal" value={setback} onChange={e => setSetback(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') handleApply(); }} className={inputCls(isDark)} /></div>
       <div className="mt-3 pt-1 flex gap-2">
-        <button onClick={handleApply} disabled={!dirty} className={`flex-1 py-1.5 text-xs rounded transition-colors ${applied ? 'bg-green-600 text-white' : dirty ? 'bg-cyan-600 hover:bg-cyan-500 text-white' : 'bg-cyan-900/60 text-cyan-400/50 cursor-not-allowed'}`}>{applied ? '✓ Applied' : 'Apply'}</button>
-        <button onClick={handleDelete} className="py-1.5 px-3 bg-gray-700 hover:bg-red-900 text-red-400 text-xs rounded">Delete</button>
+        <button onClick={handleApply} disabled={!dirty} className={`flex-1 py-1.5 text-xs rounded transition-colors ${applied ? 'bg-green-600 text-white' : dirty ? 'bg-cyan-600 hover:bg-cyan-500 text-white' : isDark ? 'bg-cyan-900/60 text-cyan-400/50 cursor-not-allowed' : 'bg-gray-200 text-gray-500 cursor-not-allowed'}`}>{applied ? '✓ Applied' : 'Apply'}</button>
+        <button onClick={handleDelete} className={`py-1.5 px-3 text-xs rounded ${isDark ? 'bg-gray-700 hover:bg-red-900 text-red-400' : 'bg-gray-100 hover:bg-red-100 text-red-600'}`}>Delete</button>
       </div>
     </div>
   );
@@ -312,6 +317,7 @@ function DoorEditor({ door, wall, nodes, walls, windows, doors, labels, interior
   saveHistory: (n: Node[], w: Wall[], wins?: WindowObj[], ds?: DoorObj[]) => void;
   onDone: () => void;
 }) {
+  const isDark = useIsDark();
   const [opening, setOpening] = useState(door.opening);
   const [hinge, setHinge] = useState(door.hinge);
   const [width, setWidth] = useState(door.width.toString());
@@ -356,34 +362,34 @@ function DoorEditor({ door, wall, nodes, walls, windows, doors, labels, interior
   return (
     <div className="space-y-2.5">
       <div>
-        <label className={labelCls}>Opening</label>
+        <label className={labelCls(isDark)}>Opening</label>
         <div className="flex gap-1">
-          <button onClick={() => setOpening('inward')} className={btnToggle(opening === 'inward')}>Inward</button>
-          <button onClick={() => setOpening('outward')} className={btnToggle(opening === 'outward')}>Outward</button>
+          <button onClick={() => setOpening('inward')} className={btnToggle(opening === 'inward', isDark)}>Inward</button>
+          <button onClick={() => setOpening('outward')} className={btnToggle(opening === 'outward', isDark)}>Outward</button>
         </div>
       </div>
       <div>
-        <label className={labelCls}>Hinge</label>
+        <label className={labelCls(isDark)}>Hinge</label>
         <div className="flex gap-1">
-          <button onClick={() => setHinge('left')} className={btnToggle(hinge === 'left')}>Left</button>
-          <button onClick={() => setHinge('right')} className={btnToggle(hinge === 'right')}>Right</button>
+          <button onClick={() => setHinge('left')} className={btnToggle(hinge === 'left', isDark)}>Left</button>
+          <button onClick={() => setHinge('right')} className={btnToggle(hinge === 'right', isDark)}>Right</button>
         </div>
       </div>
       <div className="grid grid-cols-2 gap-2">
-        <div><label className={labelCls}>Width (m)</label><input type="number" inputMode="decimal" value={width} onChange={e => setWidth(e.target.value)} className={inputCls} /></div>
-        <div><label className={labelCls}>Height (m)</label><input type="number" inputMode="decimal" value={height} onChange={e => setHeight(e.target.value)} className={inputCls} /></div>
+        <div><label className={labelCls(isDark)}>Width (m)</label><input type="number" inputMode="decimal" value={width} onChange={e => setWidth(e.target.value)} className={inputCls(isDark)} /></div>
+        <div><label className={labelCls(isDark)}>Height (m)</label><input type="number" inputMode="decimal" value={height} onChange={e => setHeight(e.target.value)} className={inputCls(isDark)} /></div>
       </div>
       <div>
-        <label className={labelCls}>Setback Reference</label>
+        <label className={labelCls(isDark)}>Setback Reference</label>
         <div className="flex gap-1">
-          <button onClick={() => setFromNodeA(isLeftFromNodeA)} className={btnToggle(isLeftActive)}>Left</button>
-          <button onClick={() => setFromNodeA(!isLeftFromNodeA)} className={btnToggle(!isLeftActive)}>Right</button>
+          <button onClick={() => setFromNodeA(isLeftFromNodeA)} className={btnToggle(isLeftActive, isDark)}>Left</button>
+          <button onClick={() => setFromNodeA(!isLeftFromNodeA)} className={btnToggle(!isLeftActive, isDark)}>Right</button>
         </div>
       </div>
-      <div><label className={labelCls}>Setback (m)</label><input type="number" inputMode="decimal" value={setback} onChange={e => setSetback(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') handleApply(); }} className={inputCls} /></div>
+      <div><label className={labelCls(isDark)}>Setback (m)</label><input type="number" inputMode="decimal" value={setback} onChange={e => setSetback(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') handleApply(); }} className={inputCls(isDark)} /></div>
       <div className="mt-3 pt-1 flex gap-2">
-        <button onClick={handleApply} disabled={!dirty} className={`flex-1 py-1.5 text-xs rounded transition-colors ${applied ? 'bg-green-600 text-white' : dirty ? 'bg-cyan-600 hover:bg-cyan-500 text-white' : 'bg-cyan-900/60 text-cyan-400/50 cursor-not-allowed'}`}>{applied ? '✓ Applied' : 'Apply'}</button>
-        <button onClick={handleDelete} className="py-1.5 px-3 bg-gray-700 hover:bg-red-900 text-red-400 text-xs rounded">Delete</button>
+        <button onClick={handleApply} disabled={!dirty} className={`flex-1 py-1.5 text-xs rounded transition-colors ${applied ? 'bg-green-600 text-white' : dirty ? 'bg-cyan-600 hover:bg-cyan-500 text-white' : isDark ? 'bg-cyan-900/60 text-cyan-400/50 cursor-not-allowed' : 'bg-gray-200 text-gray-500 cursor-not-allowed'}`}>{applied ? '✓ Applied' : 'Apply'}</button>
+        <button onClick={handleDelete} className={`py-1.5 px-3 text-xs rounded ${isDark ? 'bg-gray-700 hover:bg-red-900 text-red-400' : 'bg-gray-100 hover:bg-red-100 text-red-600'}`}>Delete</button>
       </div>
     </div>
   );
@@ -397,6 +403,7 @@ function PassageEditor({ passage, wall, nodes, walls, windows, doors, passages, 
   saveHistory: (n: Node[], w: Wall[], wins?: WindowObj[], ds?: DoorObj[], ps?: PassageObj[]) => void;
   onDone: () => void;
 }) {
+  const isDark = useIsDark();
   const [width, setWidth] = useState(passage.width.toString());
   const [offset, setOffset] = useState(passage.offset.toFixed(3));
   const [fromNodeA, setFromNodeA] = useState(passage.fromNodeA);
@@ -434,18 +441,18 @@ function PassageEditor({ passage, wall, nodes, walls, windows, doors, passages, 
 
   return (
     <div className="space-y-2.5">
-      <div><label className={labelCls}>Width (m)</label><input type="number" inputMode="decimal" value={width} onChange={e => setWidth(e.target.value)} className={inputCls} /></div>
+      <div><label className={labelCls(isDark)}>Width (m)</label><input type="number" inputMode="decimal" value={width} onChange={e => setWidth(e.target.value)} className={inputCls(isDark)} /></div>
       <div>
-        <label className={labelCls}>Setback Reference</label>
+        <label className={labelCls(isDark)}>Setback Reference</label>
         <div className="flex gap-1">
-          <button onClick={() => setFromNodeA(isLeftFromNodeA)} className={btnToggle(isLeftActive)}>Left</button>
-          <button onClick={() => setFromNodeA(!isLeftFromNodeA)} className={btnToggle(!isLeftActive)}>Right</button>
+          <button onClick={() => setFromNodeA(isLeftFromNodeA)} className={btnToggle(isLeftActive, isDark)}>Left</button>
+          <button onClick={() => setFromNodeA(!isLeftFromNodeA)} className={btnToggle(!isLeftActive, isDark)}>Right</button>
         </div>
       </div>
-      <div><label className={labelCls}>Setback (m)</label><input type="number" inputMode="decimal" value={offset} onChange={e => setOffset(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') handleApply(); }} className={inputCls} /></div>
+      <div><label className={labelCls(isDark)}>Setback (m)</label><input type="number" inputMode="decimal" value={offset} onChange={e => setOffset(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') handleApply(); }} className={inputCls(isDark)} /></div>
       <div className="mt-3 pt-1 flex gap-2">
-        <button onClick={handleApply} disabled={!dirty} className={`flex-1 py-1.5 text-xs rounded transition-colors ${applied ? 'bg-green-600 text-white' : dirty ? 'bg-cyan-600 hover:bg-cyan-500 text-white' : 'bg-cyan-900/60 text-cyan-400/50 cursor-not-allowed'}`}>{applied ? '✓ Applied' : 'Apply'}</button>
-        <button onClick={handleDelete} className="py-1.5 px-3 bg-gray-700 hover:bg-red-900 text-red-400 text-xs rounded">Delete</button>
+        <button onClick={handleApply} disabled={!dirty} className={`flex-1 py-1.5 text-xs rounded transition-colors ${applied ? 'bg-green-600 text-white' : dirty ? 'bg-cyan-600 hover:bg-cyan-500 text-white' : isDark ? 'bg-cyan-900/60 text-cyan-400/50 cursor-not-allowed' : 'bg-gray-200 text-gray-500 cursor-not-allowed'}`}>{applied ? '✓ Applied' : 'Apply'}</button>
+        <button onClick={handleDelete} className={`py-1.5 px-3 text-xs rounded ${isDark ? 'bg-gray-700 hover:bg-red-900 text-red-400' : 'bg-gray-100 hover:bg-red-100 text-red-600'}`}>Delete</button>
       </div>
     </div>
   );
@@ -461,6 +468,7 @@ function ColumnEditor({ col, wall, nodes, walls, windows, doors, passages, colum
   onStartColumnJoin: () => void;
   canMerge: boolean;
 }) {
+  const isDark = useIsDark();
   const isMerged = col.mergedShapes && col.mergedShapes.length > 0;
   // Left = CCW node, Right = CW node
   // 'cw' distance type = from nodeA. If nodeA is CCW, then 'cw' = Left.
@@ -514,53 +522,53 @@ function ColumnEditor({ col, wall, nodes, walls, windows, doors, passages, colum
   return (
     <div className="space-y-2.5">
       {isMerged && (
-        <div className="p-2 bg-yellow-900/30 border border-yellow-600/50 rounded">
-          <p className="text-yellow-400 text-[10px]">Merged column \u2014 dimensions locked</p>
+        <div className={`p-2 rounded border ${isDark ? 'bg-yellow-900/30 border-yellow-600/50' : 'bg-yellow-50 border-yellow-300'}`}>
+          <p className={`${isDark ? 'text-yellow-400' : 'text-yellow-700'} text-[10px]`}>Merged column \u2014 dimensions locked</p>
         </div>
       )}
       <div className="grid grid-cols-2 gap-2">
         <div>
-          <label className={labelCls}>Width (m)</label>
+          <label className={labelCls(isDark)}>Width (m)</label>
           <input type="number" inputMode="decimal" value={colWidth} onChange={e => setColWidth(e.target.value)}
-            disabled={!!isMerged} className={`${inputCls} ${isMerged ? 'opacity-50 cursor-not-allowed' : ''}`} />
+            disabled={!!isMerged} className={`${inputCls(isDark)} ${isMerged ? 'opacity-50 cursor-not-allowed' : ''}`} />
         </div>
         <div>
-          <label className={labelCls}>Depth (m)</label>
+          <label className={labelCls(isDark)}>Depth (m)</label>
           <input type="number" inputMode="decimal" value={depth} onChange={e => setDepth(e.target.value)}
-            disabled={!!isMerged} className={`${inputCls} ${isMerged ? 'opacity-50 cursor-not-allowed' : ''}`} />
+            disabled={!!isMerged} className={`${inputCls(isDark)} ${isMerged ? 'opacity-50 cursor-not-allowed' : ''}`} />
         </div>
       </div>
       <div>
-        <label className={labelCls}>Inset (m)</label>
-        <input type="number" inputMode="decimal" value={inset} onChange={e => setInset(e.target.value)} className={inputCls} />
-        <p className="text-gray-600 text-[10px] mt-0.5">0 = flush with wall</p>
+        <label className={labelCls(isDark)}>Inset (m)</label>
+        <input type="number" inputMode="decimal" value={inset} onChange={e => setInset(e.target.value)} className={inputCls(isDark)} />
+        <p className={`${isDark ? 'text-gray-600' : 'text-gray-400'} text-[10px] mt-0.5`}>0 = flush with wall</p>
       </div>
       <div>
-        <label className={labelCls}>Setback Reference</label>
+        <label className={labelCls(isDark)}>Setback Reference</label>
         <div className="flex gap-1">
-          <button onClick={() => setDistType(leftType)} className={btnToggle(distType === leftType)}>Left</button>
-          <button onClick={() => setDistType(rightType)} className={btnToggle(distType === rightType)}>Right</button>
+          <button onClick={() => setDistType(leftType)} className={btnToggle(distType === leftType, isDark)}>Left</button>
+          <button onClick={() => setDistType(rightType)} className={btnToggle(distType === rightType, isDark)}>Right</button>
         </div>
       </div>
       <div>
-        <label className={labelCls}>Setback (m)</label>
+        <label className={labelCls(isDark)}>Setback (m)</label>
         <input type="number" inputMode="decimal"
           value={distType === 'cw' ? distCW : distCCW}
           onChange={e => distType === 'cw' ? setDistCW(e.target.value) : setDistCCW(e.target.value)}
           onKeyDown={e => { if (e.key === 'Enter') handleApply(); }}
-          className={inputCls} />
+          className={inputCls(isDark)} />
       </div>
       <div className="mt-3 pt-1 flex gap-2">
-        <button onClick={handleApply} disabled={!dirty} className={`flex-1 py-1.5 text-xs rounded transition-colors ${applied ? 'bg-green-600 text-white' : dirty ? 'bg-cyan-600 hover:bg-cyan-500 text-white' : 'bg-cyan-900/60 text-cyan-400/50 cursor-not-allowed'}`}>{applied ? '✓ Applied' : 'Apply'}</button>
-        <button onClick={handleDelete} className="py-1.5 px-3 bg-gray-700 hover:bg-red-900 text-red-400 text-xs rounded">Delete</button>
+        <button onClick={handleApply} disabled={!dirty} className={`flex-1 py-1.5 text-xs rounded transition-colors ${applied ? 'bg-green-600 text-white' : dirty ? 'bg-cyan-600 hover:bg-cyan-500 text-white' : isDark ? 'bg-cyan-900/60 text-cyan-400/50 cursor-not-allowed' : 'bg-gray-200 text-gray-500 cursor-not-allowed'}`}>{applied ? '✓ Applied' : 'Apply'}</button>
+        <button onClick={handleDelete} className={`py-1.5 px-3 text-xs rounded ${isDark ? 'bg-gray-700 hover:bg-red-900 text-red-400' : 'bg-gray-100 hover:bg-red-100 text-red-600'}`}>Delete</button>
       </div>
-      <div className="mt-3 pt-3 border-t border-gray-600/50">
+      <div className={`mt-3 pt-3 border-t ${isDark ? 'border-gray-600/50' : 'border-gray-200'}`}>
         <button onClick={onStartColumnJoin} disabled={!canMerge}
-          className={`w-full py-1.5 text-xs rounded ${canMerge ? 'bg-gray-700 hover:bg-gray-600 text-green-400' : 'bg-gray-700 text-gray-500 cursor-not-allowed'}`}>
+          className={`w-full py-1.5 text-xs rounded ${canMerge ? isDark ? 'bg-gray-700 hover:bg-gray-600 text-green-400' : 'bg-gray-100 hover:bg-gray-200 text-green-600' : isDark ? 'bg-gray-700 text-gray-500 cursor-not-allowed' : 'bg-gray-100 text-gray-300 cursor-not-allowed'}`}>
           Merge Columns
         </button>
         {!canMerge && (
-          <p className="text-gray-500 text-[10px] mt-1 italic">
+          <p className={`${isDark ? 'text-gray-500' : 'text-gray-400'} text-[10px] mt-1 italic`}>
             Requires 2+ columns that are placed along the same wall
           </p>
         )}
@@ -585,6 +593,7 @@ export function EditorSection(props: EditorSectionProps) {
     onDeleteWall, canDeleteWall, deleteWallDisabledReason,
   } = props;
 
+  const isDark = useIsDark();
   const selectedWall = selectedWallId ? walls.find(w => w.id === selectedWallId) ?? null : null;
 
   // Get labels for the relevant wall
@@ -593,12 +602,16 @@ export function EditorSection(props: EditorSectionProps) {
     catch { return { nodeALabel: 'CW' as const, nodeBLabel: 'CCW' as const }; }
   };
 
+  const sectionHeader = `text-[11px] ${isDark ? 'text-gray-400' : 'text-gray-500'} uppercase tracking-wider mb-2`;
+  const promptText = `${isDark ? 'text-gray-500' : 'text-gray-400'} text-xs`;
+  const wallInfoText = `${isDark ? 'text-gray-500' : 'text-gray-400'} text-xs mb-2`;
+
   // -- Wall mode --
   if (selectedTool === 'wall') {
-    if (!selectedWall) return <p className="text-gray-500 text-xs italic">Select a wall to edit</p>;
+    if (!selectedWall) return <p className={`${promptText} italic`}>Select a wall to edit</p>;
     return (
       <div>
-        <h4 className="text-[11px] text-gray-400 uppercase tracking-wider mb-2">Wall</h4>
+        <h4 className={sectionHeader}>Wall</h4>
         <WallEditor wall={selectedWall} nodes={nodes} walls={walls} unconstrainedNodes={unconstrainedNodes} saveHistory={saveHistory} setValidationError={setValidationError} onDeleteWall={onDeleteWall} canDeleteWall={canDeleteWall} deleteDisabledReason={deleteWallDisabledReason} />
       </div>
     );
@@ -612,7 +625,7 @@ export function EditorSection(props: EditorSectionProps) {
       if (!wall) return null;
       return (
         <div>
-          <h4 className="text-[11px] text-gray-400 uppercase tracking-wider mb-2">Window</h4>
+          <h4 className={sectionHeader}>Window</h4>
           <WindowEditor
             win={selectedWindow} wall={wall} nodes={nodes} walls={walls} windows={windows}
             labels={getLabels(wall.id)} interiorSign={wallInteriorSign.get(wall.id) ?? -1} saveHistory={saveHistory} onDone={() => setSelectedWindowId(null)}
@@ -623,15 +636,15 @@ export function EditorSection(props: EditorSectionProps) {
     if (selectedWall) {
       return (
         <div>
-          <h4 className="text-[11px] text-gray-400 uppercase tracking-wider mb-2">Window</h4>
-          <p className="text-gray-500 text-xs mb-2">Wall selected ({selectedWall.length.toFixed(3)}m)</p>
+          <h4 className={sectionHeader}>Window</h4>
+          <p className={wallInfoText}>Wall selected ({selectedWall.length.toFixed(3)}m)</p>
           <button onClick={onAddOrEditWindow} className="w-full py-1.5 bg-green-600 hover:bg-green-500 text-white text-xs rounded">
             + Add Window
           </button>
         </div>
       );
     }
-    return <p className="text-gray-500 text-xs italic">Select a wall or window</p>;
+    return <p className={`${promptText} italic`}>Select a wall or window</p>;
   }
 
   // -- Door mode --
@@ -642,7 +655,7 @@ export function EditorSection(props: EditorSectionProps) {
       if (!wall) return null;
       return (
         <div>
-          <h4 className="text-[11px] text-gray-400 uppercase tracking-wider mb-2">Door</h4>
+          <h4 className={sectionHeader}>Door</h4>
           <DoorEditor
             door={selectedDoor} wall={wall} nodes={nodes} walls={walls} windows={windows} doors={doors}
             labels={getLabels(wall.id)} interiorSign={wallInteriorSign.get(wall.id) ?? -1} saveHistory={saveHistory} onDone={() => setSelectedDoorId(null)}
@@ -653,15 +666,15 @@ export function EditorSection(props: EditorSectionProps) {
     if (selectedWall) {
       return (
         <div>
-          <h4 className="text-[11px] text-gray-400 uppercase tracking-wider mb-2">Door</h4>
-          <p className="text-gray-500 text-xs mb-2">Wall selected ({selectedWall.length.toFixed(3)}m)</p>
+          <h4 className={sectionHeader}>Door</h4>
+          <p className={wallInfoText}>Wall selected ({selectedWall.length.toFixed(3)}m)</p>
           <button onClick={onAddOrEditDoor} className="w-full py-1.5 bg-green-600 hover:bg-green-500 text-white text-xs rounded">
             + Add Door
           </button>
         </div>
       );
     }
-    return <p className="text-gray-500 text-xs italic">Select a wall or door</p>;
+    return <p className={`${promptText} italic`}>Select a wall or door</p>;
   }
 
   // -- Passage mode --
@@ -672,7 +685,7 @@ export function EditorSection(props: EditorSectionProps) {
       if (!wall) return null;
       return (
         <div>
-          <h4 className="text-[11px] text-gray-400 uppercase tracking-wider mb-2">Passage</h4>
+          <h4 className={sectionHeader}>Passage</h4>
           <PassageEditor
             passage={selectedPassage} wall={wall} nodes={nodes} walls={walls} windows={windows} doors={doors} passages={passages}
             labels={getLabels(wall.id)} interiorSign={wallInteriorSign.get(wall.id) ?? -1} saveHistory={saveHistory} onDone={() => setSelectedPassageId(null)}
@@ -683,15 +696,15 @@ export function EditorSection(props: EditorSectionProps) {
     if (selectedWall) {
       return (
         <div>
-          <h4 className="text-[11px] text-gray-400 uppercase tracking-wider mb-2">Passage</h4>
-          <p className="text-gray-500 text-xs mb-2">Wall selected ({selectedWall.length.toFixed(3)}m)</p>
+          <h4 className={sectionHeader}>Passage</h4>
+          <p className={wallInfoText}>Wall selected ({selectedWall.length.toFixed(3)}m)</p>
           <button onClick={onAddOrEditPassage} className="w-full py-1.5 bg-green-600 hover:bg-green-500 text-white text-xs rounded">
             + Add Passage
           </button>
         </div>
       );
     }
-    return <p className="text-gray-500 text-xs italic">Select a wall or passage</p>;
+    return <p className={`${promptText} italic`}>Select a wall or passage</p>;
   }
 
   // -- Column mode --
@@ -699,17 +712,17 @@ export function EditorSection(props: EditorSectionProps) {
     if (columnJoinMode) {
       return (
         <div>
-          <h4 className="text-[11px] text-gray-400 uppercase tracking-wider mb-2">Merge Columns</h4>
-          <p className="text-gray-400 text-xs mb-2">
+          <h4 className={sectionHeader}>Merge Columns</h4>
+          <p className={`${isDark ? 'text-gray-400' : 'text-gray-500'} text-xs mb-2`}>
             Selected: {columnsToJoin.length} column{columnsToJoin.length !== 1 ? 's' : ''}
           </p>
-          <p className="text-gray-500 text-[10px] mb-3">Select 2 columns along the same wall to merge them</p>
+          <p className={`${isDark ? 'text-gray-500' : 'text-gray-400'} text-[10px] mb-3`}>Select 2 columns along the same wall to merge them</p>
           <div className="flex gap-2">
             <button onClick={onJoinColumns} disabled={columnsToJoin.length < 2}
-              className={`flex-1 py-1.5 text-xs rounded ${columnsToJoin.length < 2 ? 'bg-gray-700 text-gray-500 cursor-not-allowed' : 'bg-green-600 hover:bg-green-500 text-white'}`}>
+              className={`flex-1 py-1.5 text-xs rounded ${columnsToJoin.length < 2 ? isDark ? 'bg-gray-700 text-gray-500 cursor-not-allowed' : 'bg-gray-100 text-gray-300 cursor-not-allowed' : 'bg-green-600 hover:bg-green-500 text-white'}`}>
               Merge
             </button>
-            <button onClick={onCancelColumnJoin} className="flex-1 py-1.5 bg-gray-700 hover:bg-gray-600 text-gray-300 text-xs rounded">
+            <button onClick={onCancelColumnJoin} className={`flex-1 py-1.5 text-xs rounded ${isDark ? 'bg-gray-700 hover:bg-gray-600 text-gray-300' : 'bg-gray-200 hover:bg-gray-300 text-gray-600'}`}>
               Cancel
             </button>
           </div>
@@ -725,7 +738,7 @@ export function EditorSection(props: EditorSectionProps) {
       const canMerge = sameWallColumns.length >= 2;
       return (
         <div>
-          <h4 className="text-[11px] text-gray-400 uppercase tracking-wider mb-2">Column</h4>
+          <h4 className={sectionHeader}>Column</h4>
           <ColumnEditor
             col={selectedColumn} wall={wall} nodes={nodes} walls={walls} windows={windows} doors={doors}
             passages={passages} columns={columns} labels={getLabels(wall.id)}
@@ -739,8 +752,8 @@ export function EditorSection(props: EditorSectionProps) {
     if (selectedWall) {
       return (
         <div>
-          <h4 className="text-[11px] text-gray-400 uppercase tracking-wider mb-2">Column</h4>
-          <p className="text-gray-500 text-xs mb-2">Wall selected ({selectedWall.length.toFixed(3)}m)</p>
+          <h4 className={sectionHeader}>Column</h4>
+          <p className={wallInfoText}>Wall selected ({selectedWall.length.toFixed(3)}m)</p>
           <button onClick={onAddOrEditColumn} className="w-full py-1.5 bg-green-600 hover:bg-green-500 text-white text-xs rounded">
             + Add Column
           </button>
@@ -749,11 +762,11 @@ export function EditorSection(props: EditorSectionProps) {
     }
     return (
       <div>
-        <p className="text-gray-500 text-xs italic">Select a wall or column</p>
+        <p className={`${promptText} italic`}>Select a wall or column</p>
       </div>
     );
   }
 
-  return <p className="text-gray-500 text-xs italic">Select an element to edit</p>;
+  return <p className={`${promptText} italic`}>Select an element to edit</p>;
 }
 

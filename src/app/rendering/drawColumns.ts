@@ -156,14 +156,17 @@ export function drawColumns(ctx: CanvasRenderingContext2D, dc: DrawContext) {
       ctx.rotate(-transform.rotation);
       ctx.scale(1 / transform.scale, 1 / transform.scale);
 
-      ctx.fillStyle = isMarkedForJoin ? '#166534' : (isSelected ? '#9a3412' : (isColumnMode ? '#1e40af' : '#2a2a2a'));
-      ctx.strokeStyle = isMarkedForJoin ? '#22c55e' : (isSelected ? '#ea580c' : (isColumnMode ? '#3b82f6' : '#444444'));
+      const defaultLabelBg = dc.isDark ? '#2a2a2a' : '#f5f5f5';
+      const defaultLabelBorder = dc.isDark ? '#444444' : '#cccccc';
+      const defaultLabelText = dc.isDark ? '#666666' : '#555555';
+      ctx.fillStyle = isMarkedForJoin ? '#166534' : (isSelected ? '#9a3412' : (isColumnMode ? '#1e40af' : defaultLabelBg));
+      ctx.strokeStyle = isMarkedForJoin ? '#22c55e' : (isSelected ? '#ea580c' : (isColumnMode ? '#3b82f6' : defaultLabelBorder));
       ctx.lineWidth = isMarkedForJoin ? 1.5 : (isSelected ? 1.5 : 1);
       ctx.font = '11px monospace';
 
       ctx.fillRect(-rw * transform.scale / 2, -rh * transform.scale / 2, rw * transform.scale, rh * transform.scale);
       ctx.strokeRect(-rw * transform.scale / 2, -rh * transform.scale / 2, rw * transform.scale, rh * transform.scale);
-      ctx.fillStyle = isMarkedForJoin ? '#86efac' : (isSelected ? '#5eead4' : (isColumnMode ? '#9ca3af' : '#666666'));
+      ctx.fillStyle = isMarkedForJoin ? '#86efac' : (isSelected ? '#5eead4' : (isColumnMode ? '#9ca3af' : defaultLabelText));
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText(txt, 0, 0);

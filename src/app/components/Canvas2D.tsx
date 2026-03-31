@@ -42,7 +42,7 @@ import {
   useGestures, useFloorPlanReducer, useProjectManager,
 } from '../hooks';
 
-export function Canvas2D({ guiReady = true, onNewProject }: { guiReady?: boolean; onNewProject?: () => void }) {
+export function Canvas2D({ guiReady = true, onNewProject, isDark = true }: { guiReady?: boolean; onNewProject?: () => void; isDark?: boolean }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const drawSceneRef = useRef<((ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) => void) | null>(null);
   const labelBoundsRef = useRef<LabelBounds[]>([]);
@@ -494,6 +494,7 @@ export function Canvas2D({ guiReady = true, onNewProject }: { guiReady?: boolean
       labelBounds: labelBoundsArr,
       pendingNode: pendingNodeRef.current,
       roomName: activeRoomName,
+      isDark,
     };
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -510,7 +511,7 @@ export function Canvas2D({ guiReady = true, onNewProject }: { guiReady?: boolean
       transform.x * cos - transform.y * sin,
       transform.x * sin + transform.y * cos,
     );
-    drawGrid(ctx, canvas.width, canvas.height, transform);
+    drawGrid(ctx, canvas.width, canvas.height, transform, isDark);
     ctx.restore();
 
     ctx.save();
@@ -542,7 +543,7 @@ export function Canvas2D({ guiReady = true, onNewProject }: { guiReady?: boolean
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     renderScene(ctx, canvas);
-  }, [transform, nodes, walls, previewLine, openLoopEndpoints, selectedWallId, unconstrainedNodes, windows, selectedWindowId, doors, selectedDoorId, passages, selectedPassageId, columns, selectedColumnId, selectedTool, columnsToJoin, columnJoinMode, activeRoomName]);
+  }, [transform, nodes, walls, previewLine, openLoopEndpoints, selectedWallId, unconstrainedNodes, windows, selectedWindowId, doors, selectedDoorId, passages, selectedPassageId, columns, selectedColumnId, selectedTool, columnsToJoin, columnJoinMode, activeRoomName, isDark]);
 
   // ---- DXF Export ------------------------------------------------------------
 

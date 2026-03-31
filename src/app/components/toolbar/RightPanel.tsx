@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { RoomData, Node, Wall, WindowObj, DoorObj, PassageObj, ColumnObj, LayerType } from '../../types';
 import { EditorSection } from './EditorSection';
 import { DeleteRoomDialog } from '../dialogs';
+import { useIsDark } from '../../contexts/ThemeContext';
 
 // -- Compute room area in m^2 using Shoelace on ordered wall-loop nodes --------
 
@@ -60,16 +61,17 @@ function CollapsibleSection({
 }: {
   title: string; defaultOpen?: boolean; borderBottom?: boolean; children: React.ReactNode;
 }) {
+  const isDark = useIsDark();
   const [open, setOpen] = useState(defaultOpen);
   return (
-    <div className={borderBottom ? 'border-b border-gray-700' : ''}>
+    <div className={borderBottom ? `border-b ${isDark ? 'border-gray-700' : 'border-gray-200'}` : ''}>
       <button
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-gray-800/60 transition-colors"
+        className={`w-full flex items-center justify-between px-4 py-2.5 transition-colors ${isDark ? 'hover:bg-gray-800/60' : 'hover:bg-gray-100'}`}
       >
-        <span className="text-xs text-gray-400 uppercase tracking-wider">{title}</span>
+        <span className={`text-xs uppercase tracking-wider ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{title}</span>
         <svg
-          width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6b7280"
+          width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={isDark ? '#6b7280' : '#9ca3af'}
           strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
           className={`transition-transform ${open ? 'rotate-180' : ''}`}
         >
@@ -176,6 +178,8 @@ export function RightPanel(props: RightPanelProps) {
     onDeleteWall, canDeleteWall, deleteWallDisabledReason,
   } = props;
 
+  const isDark = useIsDark();
+
   // -- Project name editing --
   const [editingProjectName, setEditingProjectName] = useState(false);
   const [projectNameDraft, setProjectNameDraft] = useState('');
@@ -221,8 +225,8 @@ export function RightPanel(props: RightPanelProps) {
       <button
         onClick={onTogglePanel}
         className={`hidden md:flex fixed top-3 z-40 w-5 h-8 items-center justify-center
-          bg-gray-800/80 border border-gray-700 border-r-0 rounded-l
-          hover:bg-gray-700 transition-all ease-in-out
+          border border-r-0 rounded-l transition-all ease-in-out
+          ${isDark ? 'bg-gray-800/80 border-gray-700 hover:bg-gray-700' : 'bg-white/90 border-gray-200 hover:bg-gray-50'}
           ${panelOpen ? 'right-72' : 'right-0'}
           ${guiReady ? 'duration-500 translate-x-0 opacity-100' : 'duration-0 translate-x-4 opacity-0'}`}
         title={panelOpen ? 'Hide Panel' : 'Show Panel'}
@@ -238,8 +242,9 @@ export function RightPanel(props: RightPanelProps) {
 
       {/* Panel -- desktop only, slides in/out */}
       <div
-        className={`hidden md:flex fixed top-0 bottom-0 w-72 bg-gray-900/95 backdrop-blur border-l border-gray-700 z-30 flex-col overflow-hidden
-          transition-transform ease-in-out ${guiReady ? 'duration-500' : 'duration-0'} ${panelOpen && guiReady ? 'right-0 translate-x-0' : 'right-0 translate-x-full'}`}
+        className={`hidden md:flex fixed top-0 bottom-0 w-72 backdrop-blur border-l z-30 flex-col overflow-hidden
+          transition-transform ease-in-out ${guiReady ? 'duration-500' : 'duration-0'} ${panelOpen && guiReady ? 'right-0 translate-x-0' : 'right-0 translate-x-full'}
+          ${isDark ? 'bg-gray-900/95 border-gray-700' : 'bg-white/95 border-gray-200'}`}
       >
         {/* Scrollable content area */}
         <div className="flex-1 overflow-y-auto flex flex-col">
@@ -254,13 +259,13 @@ export function RightPanel(props: RightPanelProps) {
                     value={projectNameDraft}
                     onChange={e => setProjectNameDraft(e.target.value)}
                     onKeyDown={e => { if (e.key === 'Enter') handleFinishEditProjectName(); if (e.key === 'Escape') setEditingProjectName(false); }}
-                    className="flex-1 bg-gray-800 border border-gray-600 rounded px-2 py-1 text-white text-sm outline-none focus:border-cyan-500"
+                    className={`flex-1 border rounded px-2 py-1 text-sm outline-none focus:border-cyan-500 ${isDark ? 'bg-gray-800 border-gray-600 text-white' : 'bg-gray-100 border-gray-300 text-gray-900'}`}
                   />
                   <button onClick={handleFinishEditProjectName} className="text-cyan-400 hover:text-cyan-300 text-sm">OK</button>
                 </div>
               ) : (
                 <div className="flex items-center gap-2 group cursor-pointer" onClick={handleStartEditProjectName}>
-                  <h2 className="text-sm text-white truncate flex-1">{projectName}</h2>
+                  <h2 className={`text-sm truncate flex-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>{projectName}</h2>
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
                     className="opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
                     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
@@ -272,7 +277,7 @@ export function RightPanel(props: RightPanelProps) {
 
             {/* Rooms header + Add */}
             <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] text-gray-500 uppercase tracking-wider">Rooms</span>
+              <span className={`text-[10px] uppercase tracking-wider ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>Rooms</span>
               <button
                 onClick={() => { setNewRoomName(''); setShowNewRoomPrompt(true); }}
                 className="text-xs text-cyan-400 hover:text-cyan-300 flex items-center gap-1"
@@ -286,14 +291,14 @@ export function RightPanel(props: RightPanelProps) {
 
             {/* New room prompt */}
             {showNewRoomPrompt && (
-              <div className="mb-2 p-2 bg-gray-800 rounded-lg border border-gray-600">
+              <div className={`mb-2 p-2 rounded-lg border ${isDark ? 'bg-gray-800 border-gray-600' : 'bg-gray-50 border-gray-200'}`}>
                 <input
                   autoFocus
                   value={newRoomName}
                   onChange={e => setNewRoomName(e.target.value)}
                   onKeyDown={e => { if (e.key === 'Enter') handleAddRoom(); if (e.key === 'Escape') setShowNewRoomPrompt(false); }}
                   placeholder="Room name..."
-                  className="w-full bg-gray-700 border border-gray-600 rounded px-2 py-1.5 text-white text-sm outline-none focus:border-cyan-500 placeholder-gray-500 mb-2"
+                  className={`w-full border rounded px-2 py-1.5 text-sm outline-none focus:border-cyan-500 mb-2 ${isDark ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-500' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400'}`}
                 />
                 <div className="flex gap-2">
                   <button onClick={handleAddRoom}
@@ -301,7 +306,7 @@ export function RightPanel(props: RightPanelProps) {
                     Create
                   </button>
                   <button onClick={() => setShowNewRoomPrompt(false)}
-                    className="flex-1 px-2 py-1 bg-gray-700 hover:bg-gray-600 text-gray-300 text-xs rounded transition-colors">
+                    className={`flex-1 px-2 py-1 text-xs rounded transition-colors ${isDark ? 'bg-gray-700 hover:bg-gray-600 text-gray-300' : 'bg-gray-200 hover:bg-gray-300 text-gray-600'}`}>
                     Cancel
                   </button>
                 </div>
@@ -322,13 +327,13 @@ export function RightPanel(props: RightPanelProps) {
                     key={room.id}
                     className={`group rounded-lg px-3 py-2 cursor-pointer transition-colors ${
                       isActive
-                        ? 'bg-cyan-900/40 border border-cyan-700/50'
-                        : 'bg-gray-800/60 border border-transparent hover:bg-gray-800 hover:border-gray-700'
+                        ? isDark ? 'bg-cyan-900/40 border border-cyan-700/50' : 'bg-cyan-50 border border-cyan-200'
+                        : isDark ? 'bg-gray-800/60 border border-transparent hover:bg-gray-800 hover:border-gray-700' : 'bg-gray-50 border border-transparent hover:bg-gray-100 hover:border-gray-200'
                     }`}
                     onClick={() => { if (!isEditing) onSwitchRoom(room.id); }}
                   >
                     <div className="flex items-center gap-2">
-                      <div className={`w-2 h-2 rounded-full flex-shrink-0 ${isActive ? 'bg-cyan-400' : hasContent ? 'bg-gray-500' : 'bg-gray-700'}`} />
+                      <div className={`w-2 h-2 rounded-full flex-shrink-0 ${isActive ? (isDark ? 'bg-cyan-400' : 'bg-cyan-500') : hasContent ? (isDark ? 'bg-gray-500' : 'bg-gray-400') : (isDark ? 'bg-gray-700' : 'bg-gray-300')}`} />
 
                       {isEditing ? (
                         <input
@@ -338,10 +343,10 @@ export function RightPanel(props: RightPanelProps) {
                           onKeyDown={e => { if (e.key === 'Enter') handleFinishRename(); if (e.key === 'Escape') setEditingRoomId(null); }}
                           onBlur={handleFinishRename}
                           onClick={e => e.stopPropagation()}
-                          className="flex-1 bg-gray-700 border border-gray-600 rounded px-1.5 py-0.5 text-white text-sm outline-none focus:border-cyan-500 min-w-0"
+                          className={`flex-1 border rounded px-1.5 py-0.5 text-sm outline-none focus:border-cyan-500 min-w-0 ${isDark ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
                         />
                       ) : (
-                        <span className={`flex-1 text-sm truncate ${isActive ? 'text-white' : 'text-gray-300'}`}>
+                        <span className={`flex-1 text-sm truncate ${isActive ? (isDark ? 'text-white' : 'text-gray-900') : (isDark ? 'text-gray-300' : 'text-gray-600')}`}>
                           {room.name}
                         </span>
                       )}
@@ -376,7 +381,7 @@ export function RightPanel(props: RightPanelProps) {
                       )}
                     </div>
 
-                    <div className="mt-1 ml-4 text-[10px] text-gray-500">
+                    <div className={`mt-1 ml-4 text-[10px] ${isActive ? (isDark ? 'text-cyan-400/70' : 'text-cyan-700/70') : (isDark ? 'text-gray-500' : 'text-gray-500')}`}>
                       {wallCount} wall{wallCount !== 1 ? 's' : ''}
                       {room.windows.length > 0 && ` \u00b7 ${room.windows.length} win`}
                       {room.doors.length > 0 && ` \u00b7 ${room.doors.length} door`}
@@ -428,14 +433,14 @@ export function RightPanel(props: RightPanelProps) {
             />
           </CollapsibleSection>
           {/* === 3. ACTIONS SECTION === */}
-          <div className="px-3 py-3 border-t border-gray-700 space-y-1.5 mt-auto">
+          <div className={`px-3 py-3 border-t space-y-1.5 mt-auto ${isDark ? 'border-gray-700' : 'border-gray-200'}`}>
             {/* Undo / Redo */}
-            <div className="space-y-1.5 pb-1.5 border-b border-gray-800">
+            <div className={`space-y-1.5 pb-1.5 border-b ${isDark ? 'border-gray-800' : 'border-gray-100'}`}>
               <button onClick={onUndo} disabled={historyIndex <= 0}
                 className={`w-full px-3 py-2 rounded-lg flex items-center gap-2.5 text-sm transition-colors ${
                   historyIndex <= 0
-                    ? 'bg-gray-800 text-gray-500 cursor-not-allowed'
-                    : 'bg-gray-800 text-gray-200 hover:bg-gray-700 hover:text-white'
+                    ? (isDark ? 'bg-gray-800 text-gray-500 cursor-not-allowed' : 'bg-gray-100 text-gray-400 cursor-not-allowed')
+                    : (isDark ? 'bg-gray-800 text-gray-200 hover:bg-gray-700 hover:text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:text-gray-900')
                 }`}
                 title={undoLabel ? `Undo: ${undoLabel}` : 'Undo'}
               >
@@ -443,13 +448,13 @@ export function RightPanel(props: RightPanelProps) {
                   <path d="M3 7v6h6" /><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13" />
                 </svg>
                 <span className="flex-1 text-left">Undo</span>
-                {undoLabel && <span className="text-xs text-gray-400">{undoLabel}</span>}
+                {undoLabel && <span className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{undoLabel}</span>}
               </button>
               <button onClick={onRedo} disabled={historyIndex >= historyLength - 1}
                 className={`w-full px-3 py-2 rounded-lg flex items-center gap-2.5 text-sm transition-colors ${
                   historyIndex >= historyLength - 1
-                    ? 'bg-gray-800 text-gray-500 cursor-not-allowed'
-                    : 'bg-gray-800 text-gray-200 hover:bg-gray-700 hover:text-white'
+                    ? (isDark ? 'bg-gray-800 text-gray-500 cursor-not-allowed' : 'bg-gray-100 text-gray-400 cursor-not-allowed')
+                    : (isDark ? 'bg-gray-800 text-gray-200 hover:bg-gray-700 hover:text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:text-gray-900')
                 }`}
                 title={redoLabel ? `Redo: ${redoLabel}` : 'Redo'}
               >
@@ -457,11 +462,11 @@ export function RightPanel(props: RightPanelProps) {
                   <path d="M21 7v6h-6" /><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7" />
                 </svg>
                 <span className="flex-1 text-left">Redo</span>
-                {redoLabel && <span className="text-xs text-gray-400">{redoLabel}</span>}
+                {redoLabel && <span className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{redoLabel}</span>}
               </button>
             </div>
             <button onClick={onSaveProject}
-              className="w-full px-3 py-2 rounded-lg flex items-center gap-2.5 text-sm bg-gray-800 text-gray-200 hover:bg-gray-700 hover:text-white transition-colors"
+              className={`w-full px-3 py-2 rounded-lg flex items-center gap-2.5 text-sm transition-colors ${isDark ? 'bg-gray-800 text-gray-200 hover:bg-gray-700 hover:text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:text-gray-900'}`}
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" /><polyline points="17 21 17 13 7 13 7 21" /><polyline points="7 3 7 8 15 8" />
@@ -469,29 +474,29 @@ export function RightPanel(props: RightPanelProps) {
               Save Project
             </button>
             <button onClick={onLoadProject}
-              className="w-full px-3 py-2 rounded-lg flex items-center gap-2.5 text-sm bg-gray-800 text-gray-200 hover:bg-gray-700 hover:text-white transition-colors"
+              className={`w-full px-3 py-2 rounded-lg flex items-center gap-2.5 text-sm transition-colors ${isDark ? 'bg-gray-800 text-gray-200 hover:bg-gray-700 hover:text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:text-gray-900'}`}
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" /><line x1="12" y1="11" x2="12" y2="17" /><polyline points="9 14 12 11 15 14" />
               </svg>
               Load Project
             </button>
-              <button onClick={onClearAll}
-                className="w-full px-3 py-2 rounded-lg flex items-center gap-2.5 text-sm bg-gray-800 text-gray-200 hover:bg-gray-700 hover:text-white transition-colors"
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                  <polyline points="14 2 14 8 20 8" />
-                  <line x1="12" y1="18" x2="12" y2="12" />
-                  <line x1="9" y1="15" x2="15" y2="15" />
+            <button onClick={onClearAll}
+              className={`w-full px-3 py-2 rounded-lg flex items-center gap-2.5 text-sm transition-colors ${isDark ? 'bg-gray-800 text-gray-200 hover:bg-gray-700 hover:text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:text-gray-900'}`}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+                <line x1="12" y1="18" x2="12" y2="12" />
+                <line x1="9" y1="15" x2="15" y2="15" />
               </svg>
               New Project
             </button>
             <button onClick={onExportDXF} disabled={!loopClosed}
               className={`w-full px-3 py-2 rounded-lg flex items-center gap-2.5 text-sm transition-colors ${
                 !loopClosed
-                  ? 'bg-gray-800 text-gray-500 cursor-not-allowed'
-                  : 'bg-gray-800 text-gray-200 hover:bg-gray-700 hover:text-white'
+                  ? (isDark ? 'bg-gray-800 text-gray-500 cursor-not-allowed' : 'bg-gray-100 text-gray-400 cursor-not-allowed')
+                  : (isDark ? 'bg-gray-800 text-gray-200 hover:bg-gray-700 hover:text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:text-gray-900')
               }`}
               title={loopClosed ? 'Export to DXF' : 'Close the wall loop first'}
             >
@@ -505,7 +510,7 @@ export function RightPanel(props: RightPanelProps) {
                 href="https://github.com/xep426/Planimetra"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 text-[11px] text-gray-300 hover:text-white transition-colors"
+                className={`flex items-center justify-center gap-2 text-[11px] transition-colors ${isDark ? 'text-gray-300 hover:text-white' : 'text-gray-500 hover:text-gray-800'}`}
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                   <path d="M12 .5a12 12 0 0 0-3.79 23.4c.6.11.82-.26.82-.58v-2.1c-3.34.73-4.04-1.6-4.04-1.6-.55-1.4-1.34-1.78-1.34-1.78-1.1-.75.08-.74.08-.74 1.21.08 1.85 1.24 1.85 1.24 1.08 1.84 2.84 1.31 3.53 1 .11-.78.42-1.31.76-1.61-2.67-.31-5.47-1.34-5.47-5.95 0-1.31.47-2.38 1.24-3.22-.12-.31-.54-1.57.12-3.27 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.29-1.55 3.3-1.23 3.3-1.23.66 1.7.24 2.96.12 3.27.77.84 1.24 1.91 1.24 3.22 0 4.62-2.8 5.64-5.48 5.95.43.37.81 1.1.81 2.22v3.29c0 .32.22.69.83.58A12 12 0 0 0 12 .5Z" />

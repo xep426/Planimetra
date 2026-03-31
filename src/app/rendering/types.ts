@@ -31,5 +31,7 @@ export interface DrawContext {
   pendingNode: { id: string; x: number; y: number } | null;
   /** Current room name for the room label. */
   roomName: string;
+  /** Whether the canvas is in dark mode. */
+  isDark: boolean;
 }
 

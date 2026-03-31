@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import type { LayerType } from '../../types';
+import { useIsDark } from '../../contexts/ThemeContext';
 
 interface ActionBarProps {
   selectedTool: LayerType;
@@ -46,6 +47,7 @@ export function ActionBar({
   hideMobile = false,
   renderOverride,
 }: ActionBarProps) {
+  const isDark = useIsDark();
   const canUndo = historyIndex > 0;
   const canRedo = historyIndex < historyLength - 1;
   const showMobile = !hideMobile;
@@ -67,7 +69,7 @@ export function ActionBar({
     `w-11 h-11 rounded-full shadow-lg flex items-center justify-center transition-all active:scale-90 ${
       active
         ? green ? 'bg-green-500 hover:bg-green-600 active:bg-green-700 text-white' : 'bg-white hover:bg-gray-50 active:bg-gray-100 text-gray-700'
-        : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+        : 'bg-gray-200 text-gray-500 cursor-not-allowed'
     }`;
 
   // Pill button with icon + label
@@ -75,7 +77,7 @@ export function ActionBar({
     `h-11 rounded-full px-4 shadow-lg flex items-center gap-2 text-sm font-medium transition-all active:scale-95 ${
       active
         ? green ? 'bg-green-500 hover:bg-green-600 active:bg-green-700 text-white' : 'bg-white hover:bg-gray-50 active:bg-gray-100 text-gray-700'
-        : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+        : 'bg-gray-200 text-gray-500 cursor-not-allowed'
     }`;
 
   const editIcon = (
@@ -90,7 +92,7 @@ export function ActionBar({
     </svg>
   );
 
-  const divider = <div className="w-px h-5 bg-gray-300/50 mx-1" />;
+  const divider = <div className={`w-px h-5 mx-1 ${isDark ? 'bg-gray-300/50' : 'bg-gray-500/50'}`} />;
   const label = (text: string) => showLabels ? <span>{text}</span> : null;
 
   // Context action (right of divider)

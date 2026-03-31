@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { RoomData } from '../../types';
 import { DeleteRoomDialog } from '../dialogs';
+import { useIsDark } from '../../contexts/ThemeContext';
 
 interface AppMenuProps {
   guiReady?: boolean;
@@ -40,6 +41,7 @@ export function AppMenu({
   rooms, activeRoomId,
   onSwitchRoom, onAddRoom, onRenameRoom, onDeleteRoom,
 }: AppMenuProps) {
+  const isDark = useIsDark();
   // Project name editing
   const [editingProjectName, setEditingProjectName] = useState(false);
   const [projectNameDraft, setProjectNameDraft] = useState('');
@@ -84,7 +86,7 @@ export function AppMenu({
       {/* ===== TOP-RIGHT: Mobile -- burger menu ===== */}
       <button onClick={onToggleMenu}
         className={`md:hidden fixed top-4 right-4 z-50 h-10 w-10 flex items-center justify-center transition-all ${guiReady ? 'duration-500 translate-x-0 opacity-100' : 'duration-0 translate-x-4 opacity-0'}`} title="Menu">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.85)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={isDark ? 'rgba(255,255,255,0.85)' : 'rgba(17,24,39,0.85)'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           {menuOpen
             ? <><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></>
             : <><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></>
@@ -97,13 +99,13 @@ export function AppMenu({
             onClick={onCloseMenu}
           />
           <div
-            className={`md:hidden fixed top-0 right-0 bottom-0 w-[85vw] bg-gray-900 shadow-2xl z-50 flex flex-col transition-transform duration-200 will-change-transform ${menuOpen ? 'translate-x-0' : 'translate-x-full pointer-events-none'}`}
+            className={`md:hidden fixed top-0 right-0 bottom-0 w-[85vw] shadow-2xl z-50 flex flex-col transition-transform duration-200 will-change-transform ${isDark ? 'bg-gray-900' : 'bg-white'} ${menuOpen ? 'translate-x-0' : 'translate-x-full pointer-events-none'}`}
           >
             {/* Header area with close button */}
-            <div className="flex items-center justify-between px-4 pt-5 pb-3 border-b border-gray-700">
-              <span className="text-sm text-gray-300 uppercase tracking-wider">Planimetra</span>
-              <button onClick={onCloseMenu} className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-gray-800 transition-colors">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <div className={`flex items-center justify-between px-4 pt-5 pb-3 border-b ${isDark ? 'border-gray-700' : 'border-gray-200'}`}>
+              <span className={`text-sm uppercase tracking-wider ${isDark ? 'text-gray-300' : 'text-gray-500'}`}>Planimetra</span>
+              <button onClick={onCloseMenu} className={`w-9 h-9 rounded-full flex items-center justify-center transition-colors ${isDark ? 'hover:bg-gray-800' : 'hover:bg-gray-100'}`}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={isDark ? '#9ca3af' : '#6b7280'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
                 </svg>
               </button>
@@ -114,7 +116,7 @@ export function AppMenu({
 
               {/* === PROJECT SECTION === */}
               <div>
-                <span className="text-[10px] text-gray-500 uppercase tracking-wider">Project</span>
+                <span className={`text-[10px] uppercase tracking-wider ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>Project</span>
                 {/* Project name */}
                 <div className="mt-2 mb-3">
                   {editingProjectName ? (
@@ -124,13 +126,13 @@ export function AppMenu({
                         value={projectNameDraft}
                         onChange={e => setProjectNameDraft(e.target.value)}
                         onKeyDown={e => { if (e.key === 'Enter') handleFinishEditProjectName(); if (e.key === 'Escape') setEditingProjectName(false); }}
-                        className="flex-1 bg-gray-800 border border-gray-600 rounded px-2 py-1.5 text-white text-sm outline-none focus:border-cyan-500"
+                        className={`flex-1 border rounded px-2 py-1.5 text-sm outline-none focus:border-cyan-500 ${isDark ? 'bg-gray-800 border-gray-600 text-white' : 'bg-gray-100 border-gray-300 text-gray-900'}`}
                       />
                       <button onClick={handleFinishEditProjectName} className="text-cyan-400 hover:text-cyan-300 text-sm px-2">OK</button>
                     </div>
                   ) : (
                     <div className="flex items-center gap-2 group cursor-pointer" onClick={handleStartEditProjectName}>
-                      <h2 className="text-sm text-white truncate flex-1">{projectName}</h2>
+                      <h2 className={`text-sm truncate flex-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>{projectName}</h2>
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
                         className="opacity-50 group-hover:opacity-100 transition-opacity flex-shrink-0">
                         <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
@@ -142,7 +144,7 @@ export function AppMenu({
 
                 {/* Rooms header + Add */}
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-[10px] text-gray-500 uppercase tracking-wider">Rooms</span>
+                  <span className={`text-[10px] uppercase tracking-wider ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>Rooms</span>
                   <button
                     onClick={() => { setNewRoomName(''); setShowNewRoomPrompt(true); }}
                     className="text-xs text-cyan-400 hover:text-cyan-300 flex items-center gap-1"
@@ -156,14 +158,14 @@ export function AppMenu({
 
                 {/* New room prompt */}
                 {showNewRoomPrompt && (
-                  <div className="mb-2 p-2 bg-gray-800 rounded-lg border border-gray-600">
+                  <div className={`mb-2 p-2 rounded-lg border ${isDark ? 'bg-gray-800 border-gray-600' : 'bg-gray-50 border-gray-200'}`}>
                     <input
                       autoFocus
                       value={newRoomName}
                       onChange={e => setNewRoomName(e.target.value)}
                       onKeyDown={e => { if (e.key === 'Enter') handleAddRoom(); if (e.key === 'Escape') setShowNewRoomPrompt(false); }}
                       placeholder="Room name..."
-                      className="w-full bg-gray-700 border border-gray-600 rounded px-2 py-1.5 text-white text-sm outline-none focus:border-cyan-500 placeholder-gray-500 mb-2"
+                      className={`w-full border rounded px-2 py-1.5 text-sm outline-none focus:border-cyan-500 mb-2 ${isDark ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-500' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400'}`}
                     />
                     <div className="flex gap-2">
                       <button onClick={handleAddRoom}
@@ -171,7 +173,7 @@ export function AppMenu({
                         Create
                       </button>
                       <button onClick={() => setShowNewRoomPrompt(false)}
-                        className="flex-1 px-2 py-1.5 bg-gray-700 hover:bg-gray-600 text-gray-300 text-xs rounded transition-colors">
+                        className={`flex-1 px-2 py-1.5 text-xs rounded transition-colors ${isDark ? 'bg-gray-700 hover:bg-gray-600 text-gray-300' : 'bg-gray-200 hover:bg-gray-300 text-gray-600'}`}>
                         Cancel
                       </button>
                     </div>
@@ -192,12 +194,12 @@ export function AppMenu({
                         className={`group rounded-lg px-3 py-2 cursor-pointer transition-colors ${
                           isActive
                             ? 'bg-cyan-900/40 border border-cyan-700/50'
-                            : 'bg-gray-800/60 border border-transparent hover:bg-gray-800 hover:border-gray-700'
+                            : isDark ? 'bg-gray-800/60 border border-transparent hover:bg-gray-800 hover:border-gray-700' : 'bg-gray-50 border border-transparent hover:bg-gray-100 hover:border-gray-200'
                         }`}
                         onClick={() => { if (!isEditing) onSwitchRoom(room.id); }}
                       >
                         <div className="flex items-center gap-2">
-                          <div className={`w-2 h-2 rounded-full flex-shrink-0 ${isActive ? 'bg-cyan-400' : hasContent ? 'bg-gray-500' : 'bg-gray-700'}`} />
+                          <div className={`w-2 h-2 rounded-full flex-shrink-0 ${isActive ? 'bg-cyan-400' : hasContent ? (isDark ? 'bg-gray-500' : 'bg-gray-400') : (isDark ? 'bg-gray-700' : 'bg-gray-300')}`} />
 
                           {isEditing ? (
                             <input
@@ -207,10 +209,10 @@ export function AppMenu({
                               onKeyDown={e => { if (e.key === 'Enter') handleFinishRename(); if (e.key === 'Escape') setEditingRoomId(null); }}
                               onBlur={handleFinishRename}
                               onClick={e => e.stopPropagation()}
-                              className="flex-1 bg-gray-700 border border-gray-600 rounded px-1.5 py-0.5 text-white text-sm outline-none focus:border-cyan-500 min-w-0"
+                              className={`flex-1 border rounded px-1.5 py-0.5 text-sm outline-none focus:border-cyan-500 min-w-0 ${isDark ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
                             />
                           ) : (
-                            <span className={`flex-1 text-sm truncate ${isActive ? 'text-white' : 'text-gray-300'}`}>
+                            <span className={`flex-1 text-sm truncate ${isActive ? (isDark ? 'text-white' : 'text-gray-900') : (isDark ? 'text-gray-300' : 'text-gray-600')}`}>
                               {room.name}
                             </span>
                           )}
@@ -245,7 +247,7 @@ export function AppMenu({
                           )}
                         </div>
 
-                        <div className="mt-1 ml-4 text-[10px] text-gray-500">
+                        <div className={`mt-1 ml-4 text-[10px] ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
                           {wallCount} wall{wallCount !== 1 ? 's' : ''}
                           {room.windows.length > 0 && ` \u00b7 ${room.windows.length} win`}
                           {room.doors.length > 0 && ` \u00b7 ${room.doors.length} door`}
@@ -264,38 +266,38 @@ export function AppMenu({
                 {/* Undo / Redo -- hidden on mobile, shown on desktop (mobile uses ActionBar) */}
                 <div className="hidden md:block space-y-2">
                   <button onClick={() => { onUndo(); }} disabled={historyIndex <= 0}
-                    className={`w-full px-4 py-3 rounded-lg flex items-center gap-3 ${historyIndex <= 0 ? 'bg-gray-800 text-gray-500 cursor-not-allowed' : 'bg-gray-800 text-white hover:bg-gray-700'}`}>
+                    className={`w-full px-4 py-3 rounded-lg flex items-center gap-3 ${historyIndex <= 0 ? (isDark ? 'bg-gray-800 text-gray-500 cursor-not-allowed' : 'bg-gray-100 text-gray-300 cursor-not-allowed') : (isDark ? 'bg-gray-800 text-white hover:bg-gray-700' : 'bg-gray-100 text-gray-900 hover:bg-gray-200')}`}>
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M3 7v6h6" /><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13" />
                     </svg>
                     <span className="flex-1 text-left">Undo</span>
-                    {undoLabel && <span className="text-xs text-gray-400">{undoLabel}</span>}
+                    {undoLabel && <span className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{undoLabel}</span>}
                   </button>
                   <button onClick={() => { onRedo(); }} disabled={historyIndex >= historyLength - 1}
-                    className={`w-full px-4 py-3 rounded-lg flex items-center gap-3 ${historyIndex >= historyLength - 1 ? 'bg-gray-800 text-gray-500 cursor-not-allowed' : 'bg-gray-800 text-white hover:bg-gray-700'}`}>
+                    className={`w-full px-4 py-3 rounded-lg flex items-center gap-3 ${historyIndex >= historyLength - 1 ? (isDark ? 'bg-gray-800 text-gray-500 cursor-not-allowed' : 'bg-gray-100 text-gray-300 cursor-not-allowed') : (isDark ? 'bg-gray-800 text-white hover:bg-gray-700' : 'bg-gray-100 text-gray-900 hover:bg-gray-200')}`}>
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M21 7v6h-6" /><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7" />
                     </svg>
                     <span className="flex-1 text-left">Redo</span>
-                    {redoLabel && <span className="text-xs text-gray-400">{redoLabel}</span>}
+                    {redoLabel && <span className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{redoLabel}</span>}
                   </button>
                 </div>
                 <button onClick={() => { onSaveProject(); onCloseMenu(); }}
-                  className="w-full px-4 py-3 rounded-lg flex items-center gap-3 bg-gray-800 text-white hover:bg-gray-700">
+                  className={`w-full px-4 py-3 rounded-lg flex items-center gap-3 ${isDark ? 'bg-gray-800 text-white hover:bg-gray-700' : 'bg-gray-100 text-gray-900 hover:bg-gray-200'}`}>
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" /><polyline points="17 21 17 13 7 13 7 21" /><polyline points="7 3 7 8 15 8" />
                   </svg>
                   Save Project
                 </button>
                 <button onClick={() => { onLoadProject(); onCloseMenu(); }}
-                  className="w-full px-4 py-3 rounded-lg flex items-center gap-3 bg-gray-800 text-white hover:bg-gray-700">
+                  className={`w-full px-4 py-3 rounded-lg flex items-center gap-3 ${isDark ? 'bg-gray-800 text-white hover:bg-gray-700' : 'bg-gray-100 text-gray-900 hover:bg-gray-200'}`}>
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" /><line x1="12" y1="11" x2="12" y2="17" /><polyline points="9 14 12 11 15 14" />
                   </svg>
                   Load Project
                 </button>
                 <button onClick={() => { onClearAll(); onCloseMenu(); }}
-                  className="w-full px-4 py-3 rounded-lg flex items-center gap-3 bg-gray-800 text-gray-200 hover:bg-gray-700 hover:text-white">
+                  className={`w-full px-4 py-3 rounded-lg flex items-center gap-3 ${isDark ? 'bg-gray-800 text-gray-200 hover:bg-gray-700 hover:text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:text-gray-900'}`}>
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                     <polyline points="14 2 14 8 20 8" />
@@ -305,7 +307,7 @@ export function AppMenu({
                   New Project
                 </button>
                 <button onClick={() => { onExportDXF(); onCloseMenu(); }} disabled={!loopClosed}
-                  className={`w-full px-4 py-3 rounded-lg flex items-center gap-3 ${!loopClosed ? 'bg-gray-800 text-gray-500 cursor-not-allowed' : 'bg-gray-800 text-white hover:bg-gray-700'}`}>
+                  className={`w-full px-4 py-3 rounded-lg flex items-center gap-3 ${!loopClosed ? (isDark ? 'bg-gray-800 text-gray-500 cursor-not-allowed' : 'bg-gray-100 text-gray-300 cursor-not-allowed') : (isDark ? 'bg-gray-800 text-white hover:bg-gray-700' : 'bg-gray-100 text-gray-900 hover:bg-gray-200')}`}>
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
                   </svg>
@@ -316,7 +318,7 @@ export function AppMenu({
                     href="https://github.com/xep426/Planimetra"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-2 text-[11px] text-gray-300 hover:text-white transition-colors"
+                    className={`flex items-center justify-center gap-2 text-[11px] transition-colors ${isDark ? 'text-gray-300 hover:text-white' : 'text-gray-500 hover:text-gray-900'}`}
                   >
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                       <path d="M12 .5a12 12 0 0 0-3.79 23.4c.6.11.82-.26.82-.58v-2.1c-3.34.73-4.04-1.6-4.04-1.6-.55-1.4-1.34-1.78-1.34-1.78-1.1-.75.08-.74.08-.74 1.21.08 1.85 1.24 1.85 1.24 1.08 1.84 2.84 1.31 3.53 1 .11-.78.42-1.31.76-1.61-2.67-.31-5.47-1.34-5.47-5.95 0-1.31.47-2.38 1.24-3.22-.12-.31-.54-1.57.12-3.27 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.29-1.55 3.3-1.23 3.3-1.23.66 1.7.24 2.96.12 3.27.77.84 1.24 1.91 1.24 3.22 0 4.62-2.8 5.64-5.48 5.95.43.37.81 1.1.81 2.22v3.29c0 .32.22.69.83.58A12 12 0 0 0 12 .5Z" />

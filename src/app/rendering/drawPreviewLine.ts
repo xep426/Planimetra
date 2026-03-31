@@ -17,7 +17,7 @@ export function drawPreviewLine(
   } else return;
 
   const isSnapping = !!preview.snapNodeId;
-  const lineColor = closeLoopPreview ? '#22c55e' : (isSnapping ? '#888888' : '#555555');
+  const lineColor = closeLoopPreview ? '#22c55e' : (isSnapping ? (dc.isDark ? '#888888' : '#999999') : (dc.isDark ? '#555555' : '#888888'));
   ctx.strokeStyle = lineColor;
   ctx.lineWidth = 1.5 / transform.scale;
   ctx.lineCap = 'butt';
@@ -26,7 +26,7 @@ export function drawPreviewLine(
   ctx.setLineDash([]);
 
   if (!fromNode && pendingNode) {
-    ctx.fillStyle = '#555555';
+    ctx.fillStyle = dc.isDark ? '#555555' : '#888888';
     ctx.beginPath(); ctx.arc(fromX, fromY, 4 / transform.scale, 0, Math.PI * 2); ctx.fill();
   }
   if (!isSnapping) {

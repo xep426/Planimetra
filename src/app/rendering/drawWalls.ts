@@ -127,7 +127,8 @@ export function drawWalls(ctx: CanvasRenderingContext2D, dc: DrawContext) {
 
     // Orange in wall mode (editing wall itself), green in other modes (target for adding objects)
     const selColor = selectedTool === 'wall' ? '#f97316' : '#22c55e';
-    const baseColor = closeLoopPreview ? '#22c55e' : '#ffffff';
+    const wallBase = dc.isDark ? '#ffffff' : '#1a1a1a';
+    const baseColor = closeLoopPreview ? '#22c55e' : wallBase;
 
     // Draw wall as a simple line (inner face)
     ctx.strokeStyle = closeLoopPreview ? baseColor : (sel ? selColor : baseColor);
@@ -140,7 +141,7 @@ export function drawWalls(ctx: CanvasRenderingContext2D, dc: DrawContext) {
     // Draw outer wall preview line (gray, thin) with mitered corners
     const mitered = wallMiteredOuter.get(wall.id);
     if (mitered) {
-      ctx.strokeStyle = '#555555';
+      ctx.strokeStyle = dc.isDark ? '#555555' : '#aaaaaa';
       ctx.lineWidth = 0.8 / transform.scale;
       ctx.beginPath();
       ctx.moveTo(mitered.ax, mitered.ay);
@@ -261,12 +262,12 @@ export function drawWallLabels(ctx: CanvasRenderingContext2D, dc: DrawContext) {
     ctx.translate(d.centerX, d.centerY);
     ctx.rotate(-transform.rotation);
     ctx.scale(1 / transform.scale, 1 / transform.scale);
-    ctx.fillStyle = 'rgba(26, 26, 26, 0.85)';
-    ctx.strokeStyle = d.sel ? d.selColor : '#666666';
+    ctx.fillStyle = dc.isDark ? 'rgba(26, 26, 26, 0.85)' : 'rgba(255, 255, 255, 0.92)';
+    ctx.strokeStyle = d.sel ? d.selColor : (dc.isDark ? '#666666' : '#cccccc');
     ctx.lineWidth = d.sel ? 2 : 1;
     ctx.fillRect(-d.rw / 2, -d.rh / 2, d.rw, d.rh);
     ctx.strokeRect(-d.rw / 2, -d.rh / 2, d.rw, d.rh);
-    ctx.fillStyle = '#cccccc';
+    ctx.fillStyle = dc.isDark ? '#cccccc' : '#333333';
     ctx.font = '11px monospace';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';

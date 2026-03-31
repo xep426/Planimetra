@@ -5,10 +5,11 @@
       <meta charset="UTF-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <title>Planimetra - 2D Canvas</title>
-    <style>html,body{background:#111827;margin:0}</style>
+    <style>html,body{margin:0}</style>
+    <script>document.documentElement.style.background=localStorage.getItem('planimetraTheme')==='light'?'#f3f4f6':'#111827'</script>
     </head>
 
-    <body style="background:#111827">
+    <body>
       <div id="root"></div>
       <script type="module" src="/src/main.tsx"></script>
     </body>

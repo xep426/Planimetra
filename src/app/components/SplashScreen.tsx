@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
+import { useIsDark } from '../contexts/ThemeContext';
 
 export function SplashScreen({ onReady }: { onReady: () => void }) {
+  const isDark = useIsDark();
   const [fadeOut, setFadeOut] = useState(false);
 
   useEffect(() => {
@@ -18,7 +20,7 @@ export function SplashScreen({ onReady }: { onReady: () => void }) {
       }`}
       style={{ paddingBottom: '6rem' }}
     >
-      <h1 className="text-xl tracking-[0.35em] text-white/70" style={{ fontWeight: 200 }}>
+      <h1 className={`text-xl tracking-[0.35em] ${isDark ? 'text-white/70' : 'text-gray-500/80'}`} style={{ fontWeight: 200 }}>
         PLANIMETRA
       </h1>
     </div>

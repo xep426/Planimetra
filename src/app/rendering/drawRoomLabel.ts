@@ -80,22 +80,22 @@ export function drawRoomLabel(ctx: CanvasRenderingContext2D, dc: DrawContext) {
   const boxW = textWidth + padX * 2;
   const boxH = lineH * 2 + lineGap + padY * 2;
 
-  // Dark background rect (same as wall labels)
-  ctx.fillStyle = 'rgba(26, 26, 26, 0.85)';
-  ctx.strokeStyle = '#666666';
+  // Background rect (same as wall labels)
+  ctx.fillStyle = dc.isDark ? 'rgba(26, 26, 26, 0.85)' : 'rgba(255, 255, 255, 0.92)';
+  ctx.strokeStyle = dc.isDark ? '#666666' : '#cccccc';
   ctx.lineWidth = 1;
   ctx.fillRect(-boxW / 2, -boxH / 2, boxW, boxH);
   ctx.strokeRect(-boxW / 2, -boxH / 2, boxW, boxH);
 
   // Room name (top line)
-  ctx.fillStyle = '#cccccc';
+  ctx.fillStyle = dc.isDark ? '#cccccc' : '#333333';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.font = '11px monospace';
   ctx.fillText(nameLine, 0, -lineGap / 2 - lineH / 2);
 
   // Area (bottom line)
-  ctx.fillStyle = '#999999';
+  ctx.fillStyle = dc.isDark ? '#999999' : '#666666';
   ctx.fillText(areaLine, 0, lineGap / 2 + lineH / 2);
 
   ctx.restore();

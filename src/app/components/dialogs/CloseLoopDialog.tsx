@@ -8,11 +8,13 @@ interface CloseLoopDialogProps {
 }
 
 import { useEffect, useRef } from 'react';
+import { useIsDark } from '../../contexts/ThemeContext';
 
 export function CloseLoopDialog({
   visible, closeLoopLength, validationError,
   onLengthChange, onSubmit, onCancel,
 }: CloseLoopDialogProps) {
+  const isDark = useIsDark();
   const inputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
     if (visible && inputRef.current) inputRef.current.focus();
@@ -21,9 +23,9 @@ export function CloseLoopDialog({
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
       onClick={e => { if (e.target === e.currentTarget) onCancel(); }}>
-      <div className="bg-gray-800 p-6 shadow-xl w-full h-full md:w-96 md:h-auto md:rounded-lg overflow-y-auto">
-        <h3 className="text-white text-lg font-semibold mb-2">Close Loop</h3>
-        <p className="text-gray-400 text-sm mb-4">Closing wall length (meters):</p>
+      <div className={`${isDark ? 'bg-gray-800' : 'bg-white'} p-6 shadow-xl w-full h-full md:w-96 md:h-auto md:rounded-lg overflow-y-auto`}>
+        <h3 className={`${isDark ? 'text-white' : 'text-gray-900'} text-lg font-semibold mb-2`}>Close Loop</h3>
+        <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'} text-sm mb-4`}>Closing wall length (meters):</p>
         <input
           ref={inputRef}
           type="number"
@@ -32,12 +34,12 @@ export function CloseLoopDialog({
           value={closeLoopLength}
           onChange={e => onLengthChange(e.target.value)}
           onKeyDown={e => { if (e.key === 'Enter') onSubmit(); else if (e.key === 'Escape') onCancel(); }}
-          className="w-full px-4 py-2 bg-gray-700 text-white rounded border border-gray-600 focus:outline-none focus:border-cyan-500"
+          className={`w-full px-4 py-2 ${isDark ? 'bg-gray-700 text-white border-gray-600' : 'bg-gray-50 text-gray-900 border-gray-300'} rounded border focus:outline-none focus:border-cyan-500`}
           placeholder="e.g. 3.15" />
         {validationError && <p className="text-red-400 text-sm mt-2">{validationError}</p>}
         <div className="flex gap-2 mt-4">
           <button onClick={onSubmit} className="flex-1 px-4 py-2 bg-cyan-500 text-white rounded hover:bg-cyan-600">Create Wall</button>
-          <button onClick={onCancel} className="flex-1 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-gray-300 rounded transition-colors">Cancel</button>
+          <button onClick={onCancel} className={`flex-1 px-4 py-2 ${isDark ? 'bg-gray-700 hover:bg-gray-600 text-gray-300' : 'bg-gray-100 hover:bg-gray-200 text-gray-600'} rounded transition-colors`}>Cancel</button>
         </div>
       </div>
     </div>

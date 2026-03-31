@@ -42,7 +42,7 @@ export function drawSetbackIndicators(ctx: CanvasRenderingContext2D, dc: DrawCon
     ctx.arc(refX, 0, 5 / transform.scale, 0, Math.PI * 2);
     ctx.fillStyle = '#f97316';
     ctx.fill();
-    ctx.strokeStyle = '#ffffff';
+    ctx.strokeStyle = dc.isDark ? '#ffffff' : '#1a1a1a';
     ctx.lineWidth = 1.5 / transform.scale;
     ctx.stroke();
 

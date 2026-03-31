@@ -5,10 +5,11 @@ export function drawGrid(
   width: number,
   height: number,
   transform: Transform,
+  isDark = true,
 ) {
   const gridSize = 10;
   const extent = (Math.max(width, height) * 2) / transform.scale;
-  ctx.strokeStyle = '#2a2a2a';
+  ctx.strokeStyle = isDark ? '#2a2a2a' : '#e0e0e0';
   ctx.lineWidth = 1 / transform.scale;
   const startX = Math.floor(-extent / gridSize) * gridSize;
   const startY = Math.floor(-extent / gridSize) * gridSize;
