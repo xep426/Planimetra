@@ -174,7 +174,7 @@ export function ActionBar({
 
   const normalButtons = (
     <div className="flex items-center gap-2">
-      {/* Left: Undo + Redo */}
+      {/* Undo + Redo */}
       <button onClick={canUndo ? onUndo : () => disabledToast('Nothing to undo')} className={iconBtn(canUndo)} title="Undo">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <polyline points="9 14 4 9 9 4" /><path d="M20 20v-7a4 4 0 0 0-4-4H4" />

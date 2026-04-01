@@ -42,7 +42,7 @@ import {
   useGestures, useFloorPlanReducer, useProjectManager,
 } from '../hooks';
 
-export function Canvas2D({ guiReady = true, onNewProject, isDark = true }: { guiReady?: boolean; onNewProject?: () => void; isDark?: boolean }) {
+export function Canvas2D({ guiReady = true, onNewProject, isDark = true, onToggleTheme }: { guiReady?: boolean; onNewProject?: () => void; isDark?: boolean; onToggleTheme?: () => void }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const drawSceneRef = useRef<((ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) => void) | null>(null);
   const labelBoundsRef = useRef<LabelBounds[]>([]);
@@ -761,6 +761,7 @@ export function Canvas2D({ guiReady = true, onNewProject, isDark = true }: { gui
         historyLength={history.length}
         onToggleMenu={() => setMenuOpen(!menuOpen)}
         onCloseMenu={() => setMenuOpen(false)}
+        onToggleTheme={onToggleTheme}
         onUndo={handleUndo}
         onRedo={handleRedo}
         undoLabel={undoLabel}

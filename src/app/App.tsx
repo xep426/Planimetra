@@ -53,7 +53,7 @@ export default function App() {
     <ThemeContext.Provider value={isDark}>
       <div className={`fixed inset-0 overflow-hidden ${isDark ? 'bg-gray-900' : 'bg-gray-100'}`}>
         {!ready && <SplashScreen onReady={handleReady} />}
-        <Canvas2D guiReady={ready} onNewProject={handleNewProject} isDark={isDark} />
+        <Canvas2D guiReady={ready} onNewProject={handleNewProject} isDark={isDark} onToggleTheme={handleToggleTheme} />
         <ThemeToggle guiReady={ready} isDark={isDark} onToggle={handleToggleTheme} />
         <Toaster />
       </div>

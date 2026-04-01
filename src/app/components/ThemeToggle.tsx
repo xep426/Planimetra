@@ -9,7 +9,7 @@ export function ThemeToggle({ isDark, onToggle, guiReady = true }: ThemeTogglePr
     <button
       onClick={onToggle}
       title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-      className={`fixed bottom-4 left-4 z-50 w-11 h-11 rounded-full shadow-lg flex items-center justify-center transition-all active:scale-90
+      className={`hidden md:flex fixed bottom-4 left-4 z-50 w-11 h-11 rounded-full shadow-lg items-center justify-center transition-all active:scale-90
         ${isDark
           ? 'bg-gray-800 hover:bg-gray-700 text-gray-200'
           : 'bg-white/90 hover:bg-white text-gray-700 backdrop-blur'}
