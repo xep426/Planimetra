@@ -13,6 +13,7 @@
       <link rel="apple-touch-icon" href="/icon-192.png" />
     <style>html,body{margin:0}</style>
     <script>document.documentElement.style.background=localStorage.getItem('planimetraTheme')==='light'?'#f3f4f6':'#111827'</script>
+    <script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js')})}</script>
     </head>
 
     <body>
