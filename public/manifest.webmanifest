@@ -35,7 +35,15 @@
       "purpose": "maskable"
     }
   ],
-  "screenshots": [],
+  "screenshots": [
+    {
+      "src": "/mockup_banner.jpg",
+      "sizes": "1360x768",
+      "type": "image/jpeg",
+      "form_factor": "wide",
+      "label": "Planimetra floor plan editor"
+    }
+  ],
   "prefer_related_applications": false,
   "launch_handler": {
     "client_mode": "focus-existing"

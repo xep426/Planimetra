@@ -1,4 +1,4 @@
-![Planimetra desktop screenshot](public/screenshot_desktop.jpg)
+![Planimetra](public/mockup_banner.jpg)
 
 ## Status: Alpha
 
