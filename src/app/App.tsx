@@ -33,7 +33,13 @@ function hasExistingData(): boolean {
 }
 
 export default function App() {
-  const [ready, setReady] = useState(hasExistingData);
+  const [ready, setReady] = useState(() => {
+    if (new URLSearchParams(window.location.search).get('new') === '1') {
+      window.history.replaceState({}, '', '/');
+      return false;
+    }
+    return hasExistingData();
+  });
   const [isDark, setIsDark] = useState<boolean>(() => loadTheme() === 'dark');
   const handleReady = useCallback(() => setReady(true), []);
   const handleNewProject = useCallback(() => setReady(false), []);
