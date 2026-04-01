@@ -108,7 +108,7 @@ export function WallEditDialog({
           <div className="flex gap-2">
             <button
               onClick={handleApply} disabled={!dirty}
-              className={`flex-1 px-4 py-2.5 rounded transition-colors ${applied ? 'bg-green-600 text-white' : dirty ? 'bg-cyan-500 hover:bg-cyan-600 text-white' : 'bg-cyan-900/60 text-cyan-400/50 cursor-not-allowed'}`}>
+              className={`flex-1 px-4 py-2.5 rounded transition-colors ${applied ? 'bg-green-600 text-white' : dirty ? 'bg-cyan-500 hover:bg-cyan-600 text-white' : isDark ? 'bg-cyan-900/60 text-cyan-400/50 cursor-not-allowed' : 'bg-gray-200 text-gray-500 cursor-not-allowed'}`}>
               {applied ? '✓ Applied' : 'Apply'}
             </button>
             {onDelete && (
